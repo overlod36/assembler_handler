@@ -30,6 +30,7 @@ namespace _1
         private void InitializeComponent()
         {
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.richTextBox_code = new System.Windows.Forms.RichTextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.dataGrid_oper = new System.Windows.Forms.DataGridView();
             this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -53,8 +54,7 @@ namespace _1
             this.richTextBox_sec_err = new System.Windows.Forms.RichTextBox();
             this.but_first_cycle = new System.Windows.Forms.Button();
             this.but_sec_cycle = new System.Windows.Forms.Button();
-            this.richTextBox_code = new System.Windows.Forms.RichTextBox();
-            this.but_load_code = new System.Windows.Forms.Button();
+            this.but_fill_default = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGrid_oper)).BeginInit();
@@ -69,7 +69,6 @@ namespace _1
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.but_load_code);
             this.groupBox1.Controls.Add(this.richTextBox_code);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
@@ -78,12 +77,21 @@ namespace _1
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Исходный код";
             // 
+            // richTextBox_code
+            // 
+            this.richTextBox_code.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.richTextBox_code.Location = new System.Drawing.Point(19, 32);
+            this.richTextBox_code.Name = "richTextBox_code";
+            this.richTextBox_code.Size = new System.Drawing.Size(508, 360);
+            this.richTextBox_code.TabIndex = 0;
+            this.richTextBox_code.Text = "";
+            // 
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.dataGrid_oper);
             this.groupBox2.Location = new System.Drawing.Point(12, 427);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(415, 307);
+            this.groupBox2.Size = new System.Drawing.Size(415, 262);
             this.groupBox2.TabIndex = 3;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Таблица кодов операций";
@@ -103,7 +111,7 @@ namespace _1
             this.dataGrid_oper.RowHeadersWidth = 51;
             this.dataGrid_oper.RowTemplate.Height = 24;
             this.dataGrid_oper.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.dataGrid_oper.Size = new System.Drawing.Size(376, 257);
+            this.dataGrid_oper.Size = new System.Drawing.Size(376, 213);
             this.dataGrid_oper.TabIndex = 0;
             // 
             // Column1
@@ -287,29 +295,22 @@ namespace _1
             this.but_sec_cycle.Text = "Второй проход";
             this.but_sec_cycle.UseVisualStyleBackColor = true;
             // 
-            // richTextBox_code
+            // but_fill_default
             // 
-            this.richTextBox_code.Location = new System.Drawing.Point(19, 32);
-            this.richTextBox_code.Name = "richTextBox_code";
-            this.richTextBox_code.Size = new System.Drawing.Size(508, 325);
-            this.richTextBox_code.TabIndex = 0;
-            this.richTextBox_code.Text = "";
-            // 
-            // but_load_code
-            // 
-            this.but_load_code.Location = new System.Drawing.Point(229, 363);
-            this.but_load_code.Name = "but_load_code";
-            this.but_load_code.Size = new System.Drawing.Size(90, 35);
-            this.but_load_code.TabIndex = 1;
-            this.but_load_code.Text = "Загрузить";
-            this.but_load_code.UseVisualStyleBackColor = true;
-            this.but_load_code.Click += new System.EventHandler(this.but_load_code_Click);
+            this.but_fill_default.Location = new System.Drawing.Point(122, 695);
+            this.but_fill_default.Name = "but_fill_default";
+            this.but_fill_default.Size = new System.Drawing.Size(190, 39);
+            this.but_fill_default.TabIndex = 11;
+            this.but_fill_default.Text = "Пример по умолчанию";
+            this.but_fill_default.UseVisualStyleBackColor = true;
+            this.but_fill_default.Click += new System.EventHandler(this.but_fill_default_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1495, 746);
+            this.Controls.Add(this.but_fill_default);
             this.Controls.Add(this.but_sec_cycle);
             this.Controls.Add(this.but_first_cycle);
             this.Controls.Add(this.groupBox7);
@@ -361,7 +362,7 @@ namespace _1
         private System.Windows.Forms.Button but_first_cycle;
         private System.Windows.Forms.Button but_sec_cycle;
         private System.Windows.Forms.RichTextBox richTextBox_code;
-        private System.Windows.Forms.Button but_load_code;
+        private System.Windows.Forms.Button but_fill_default;
     }
 }
 

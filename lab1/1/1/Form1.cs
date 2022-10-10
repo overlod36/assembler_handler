@@ -13,22 +13,46 @@ namespace _1
 {
     public partial class Form1 : Form
     {
+        private string path = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
         public Form1()
         {
             InitializeComponent();
         }
 
-        private void but_first_cycle_Click(object sender, EventArgs e)
+        private void fill_op_table()
         {
-            CodeChecker ch = new CodeChecker();
-            ch.first_cycle(richTextBox_code.Text.Split('\n'));
-            ch.show_code();
+            string op = "";
+            string n1 = "", n2 = "";
+            foreach (string line in System.IO.File.ReadLines(path + "\\" + path.Split('\\').Last() + "\\res\\default_op.txt"))
+            {
+                foreach (string el in line.Split(' '))
+                {
+                    if (!int.TryParse(el, out _))
+                    {
+                        op = op + el + " ";
+                    }
+                    else
+                    {
+                        if (n1.Length == 0)
+                        {
+                            n1 = el;
+                        }
+                        else
+                        {
+                            n2 = el;
+                        }
+                    }
+                }
+                dataGrid_oper.Rows.Add(new object[] { op, n1, n2 });
+                op = "";
+                n1 = "";
+                n2 = "";
+            }
         }
 
-        private void but_load_code_Click(object sender, EventArgs e)
+        private void fill_code()
         {
             bool ret = false;
-            string path = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
             if (richTextBox_code.Text.Length == 0)
             {
                 foreach (string line in System.IO.File.ReadLines(path + "\\" + path.Split('\\').Last() + "\\res\\default_code.txt"))
@@ -46,6 +70,19 @@ namespace _1
             {
                 Console.WriteLine("Поле с кодом уже занято!");
             }
+        }
+
+        private void but_first_cycle_Click(object sender, EventArgs e)
+        {
+            CodeChecker ch = new CodeChecker();
+            ch.first_cycle(richTextBox_code.Text.Split('\n'));
+            ch.show_code();
+        }
+
+        private void but_fill_default_Click(object sender, EventArgs e)
+        {
+            fill_code();
+            fill_op_table();
         }
     }
 }
