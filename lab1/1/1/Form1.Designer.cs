@@ -54,6 +54,7 @@ namespace _1
             this.but_first_cycle = new System.Windows.Forms.Button();
             this.but_sec_cycle = new System.Windows.Forms.Button();
             this.richTextBox_code = new System.Windows.Forms.RichTextBox();
+            this.but_load_code = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGrid_oper)).BeginInit();
@@ -68,6 +69,7 @@ namespace _1
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.but_load_code);
             this.groupBox1.Controls.Add(this.richTextBox_code);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
@@ -289,9 +291,19 @@ namespace _1
             // 
             this.richTextBox_code.Location = new System.Drawing.Point(19, 32);
             this.richTextBox_code.Name = "richTextBox_code";
-            this.richTextBox_code.Size = new System.Drawing.Size(508, 360);
+            this.richTextBox_code.Size = new System.Drawing.Size(508, 325);
             this.richTextBox_code.TabIndex = 0;
             this.richTextBox_code.Text = "";
+            // 
+            // but_load_code
+            // 
+            this.but_load_code.Location = new System.Drawing.Point(229, 363);
+            this.but_load_code.Name = "but_load_code";
+            this.but_load_code.Size = new System.Drawing.Size(90, 35);
+            this.but_load_code.TabIndex = 1;
+            this.but_load_code.Text = "Загрузить";
+            this.but_load_code.UseVisualStyleBackColor = true;
+            this.but_load_code.Click += new System.EventHandler(this.but_load_code_Click);
             // 
             // Form1
             // 
@@ -349,6 +361,7 @@ namespace _1
         private System.Windows.Forms.Button but_first_cycle;
         private System.Windows.Forms.Button but_sec_cycle;
         private System.Windows.Forms.RichTextBox richTextBox_code;
+        private System.Windows.Forms.Button but_load_code;
     }
 }
 
