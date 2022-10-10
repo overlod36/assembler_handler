@@ -19,11 +19,9 @@ namespace _1
 
         private void but_first_cycle_Click(object sender, EventArgs e)
         {
-            string[] code = richTextBox_code.Text.Split('\n');
-            foreach (var el in code)
-            {
-                Console.WriteLine(el);
-            }
+            CodeChecker ch = new CodeChecker();
+            ch.first_cycle(richTextBox_code.Text.Split('\n'));
+            ch.show_code();
         }
     }
 }
