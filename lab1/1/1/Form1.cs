@@ -48,6 +48,7 @@ namespace _1
                 n1 = "";
                 n2 = "";
             }
+
         }
 
         private void fill_code()
@@ -72,11 +73,20 @@ namespace _1
             }
         }
 
+        
+
         private void but_first_cycle_Click(object sender, EventArgs e)
         {
             CodeChecker ch = new CodeChecker();
             ch.first_cycle(richTextBox_code.Text.Split('\n'));
-            ch.show_code();
+            foreach (string[] st in ch.get_nt())
+            {
+                dataGrid_name.Rows.Add(new object[] { st[0], st[1] });
+            }
+            foreach (string[] st in ch.get_at())
+            {
+                dataGrid_add.Rows.Add(new object[] { st[0], st[1], st[2], st[3] });
+            }
         }
 
         private void but_fill_default_Click(object sender, EventArgs e)
