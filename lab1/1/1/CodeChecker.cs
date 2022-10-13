@@ -104,6 +104,7 @@ namespace _1
         {
             bool check_begin = false;
             bool command_show = false;
+            int cd;
             this.set_code(st);
             if (check_begin_address()) // + проверка на переполнение
             {
@@ -143,20 +144,42 @@ namespace _1
                 if (check_ca.Length != 0) // добавить нормальную проверку на директиву
                 {
                     command_show = true;
-                    show_ex(str);
                 }
                 if (str[0] != "_") // проверка метки, еще добавить проверку на присутствие такого в таблице
                 {
                     string[] at2;
                     if (str.Length == 4)
                     {
-                        at2 = new string[] { "Адрес", str[1], str[2], str[3] };
-                        add_table.Add(at2);
+                        if (command_show == true)
+                        {
+                            if (registers.Contains(str[2]) && registers.Contains(str[3]))
+                            {
+                                cd = Int32.Parse(check_ca[0]) * 4;
+                            }
+                            else // проверка на R1..
+                            {
+                                cd = Int32.Parse(check_ca[0]) * 4 + 1;
+                            }
+                            at2 = new string[] { "Адрес", cd.ToString(), str[2], str[3] };
+                            add_table.Add(at2);
+                        }
+                        else
+                        {
+                            at2 = new string[] { "Адрес", str[1], str[2], str[3] };
+                            add_table.Add(at2);
+                        }
                     }
                     else if (str.Length == 3)
                     {
-                        at2 = new string[] { "Адрес", str[1], str[2], " " };
-                        add_table.Add(at2);
+                        if (command_show == true)
+                        {
+                            show_ex(check_ca);
+                        }
+                        else
+                        {
+                            at2 = new string[] { "Адрес", str[1], str[2], " " };
+                            add_table.Add(at2);
+                        }
                     }
                 }
                 else
@@ -164,15 +187,40 @@ namespace _1
                     string[] at3;
                     if (str.Length == 3)
                     {
-                        at3 = new string[] { "Адрес", str[1], str[2], " " };
-                        add_table.Add(at3);
+                        if (command_show == true)
+                        {
+                            at3 = new string[] { "Адрес", (Int32.Parse(check_ca[0]) * 4 + 1).ToString(), str[2], " " };
+                            add_table.Add(at3);
+                        }
+                        else
+                        {
+                            at3 = new string[] { "Адрес", str[1], str[2], " " };
+                            add_table.Add(at3);
+                        }
                     }
-                    else if (str.Length == 3)
+                    else if (str.Length == 4)
                     {
-                        at3 = new string[] { "Адрес", str[1], str[2], str[3] };
-                        add_table.Add(at3);
+                        if (command_show == true)
+                        {
+                            if (registers.Contains(str[2]) && registers.Contains(str[3]))
+                            {
+                                cd = Int32.Parse(check_ca[0]) * 4;
+                            }
+                            else // проверка на R1..
+                            {
+                                cd = Int32.Parse(check_ca[0]) * 4 + 1;
+                            }
+                            at3 = new string[] { "Адрес", cd.ToString(), str[2], str[3] };
+                            add_table.Add(at3);
+                        }
+                        else
+                        {
+                            at3 = new string[] { "Адрес", str[1], str[2], str[3] };
+                            add_table.Add(at3);
+                        }
                     }
                 }
+                command_show = false;
             }
         }
     }
