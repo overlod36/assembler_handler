@@ -81,7 +81,7 @@ namespace _1
                     return res;
                 }
                 else if (st[0] == (command[1] + " " + command[2] + " ")){
-                    string[] res = { st[1], st[2] };
+                    string[] res = { st[1], st[2], "bruh" };
                     return res;
                 }
             }
@@ -160,8 +160,18 @@ namespace _1
                             {
                                 cd = Int32.Parse(check_ca[0]) * 4 + 1;
                             }
-                            at2 = new string[] { "Адрес", cd.ToString(), str[2], str[3] };
-                            add_table.Add(at2);
+                            if (check_ca.Length == 3)
+                            {
+                                at2 = new string[] { "Адрес", cd.ToString("X2"), str[3], " " };
+                                add_table.Add(at2);
+                            }
+                            else
+                            {
+                                at2 = new string[] { "Адрес", cd.ToString("X2"), str[2], str[3] };
+                                add_table.Add(at2);
+                            }
+                            
+
                         }
                         else
                         {
@@ -189,7 +199,7 @@ namespace _1
                     {
                         if (command_show == true)
                         {
-                            at3 = new string[] { "Адрес", (Int32.Parse(check_ca[0]) * 4 + 1).ToString(), str[2], " " };
+                            at3 = new string[] { "Адрес", (Int32.Parse(check_ca[0]) * 4 + 1).ToString("X2"), str[2], " " };
                             add_table.Add(at3);
                         }
                         else
@@ -210,8 +220,17 @@ namespace _1
                             {
                                 cd = Int32.Parse(check_ca[0]) * 4 + 1;
                             }
-                            at3 = new string[] { "Адрес", cd.ToString(), str[2], str[3] };
-                            add_table.Add(at3);
+                            if (check_ca.Length == 3)
+                            {
+                                at3 = new string[] { "Адрес", cd.ToString("X2"), str[3], " " };
+                                add_table.Add(at3);
+                            }
+                            else
+                            {
+                                at3 = new string[] { "Адрес", cd.ToString("X2"), str[2], str[3] };
+                                add_table.Add(at3);
+                            }
+                            
                         }
                         else
                         {
