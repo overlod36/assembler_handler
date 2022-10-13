@@ -12,13 +12,16 @@ namespace _1
         private List<string[]> code;
         private List<string[]> name_table;
         private List<string[]> add_table;
+        private List<string[]> code_table;
+        private string[] registers = { "R1", "R2", "R3", "R4" };
         private int last_address;
 
-        public CodeChecker()
+        public CodeChecker(List<string[]> code_t)
         {
             this.code = new List<string[]>();
             this.name_table = new List<string[]>();
             this.add_table = new List<string[]>();
+            this.code_table = code_t;
         }
 
         public List<string[]> get_nt()
@@ -45,6 +48,16 @@ namespace _1
             return " ";
         }
 
+        private void show_ex(string[] line)
+        {
+            int ct = 1;
+            Console.WriteLine("[" + ct.ToString() + "]");
+            foreach (string smb in line)
+            {
+                Console.WriteLine("=> " + smb);
+            }
+        }
+
         public void show_code()
         {
             foreach (var st in this.code)
@@ -54,6 +67,25 @@ namespace _1
                     Console.WriteLine(el);
                 }
             }
+        }
+
+        public string[] get_command_code(string[] command)
+        {
+            string[] def = { };
+            
+            foreach (string[] st in this.code_table)
+            {
+                if (st[0] == (command[1] + " "))
+                {
+                    string[] res = { st[1], st[2] };
+                    return res;
+                }
+                else if (st[0] == (command[1] + " " + command[2] + " ")){
+                    string[] res = { st[1], st[2] };
+                    return res;
+                }
+            }
+            return def;
         }
 
         public bool check_begin_address()
@@ -71,6 +103,7 @@ namespace _1
         public void first_cycle(string[] st)
         {
             bool check_begin = false;
+            bool command_show = false;
             this.set_code(st);
             if (check_begin_address()) // + проверка на переполнение
             {
@@ -94,8 +127,27 @@ namespace _1
                 if (str[0] != "_") // проверка метки, еще добавить проверку на присутствие такого в таблице
                 {
                     string[] tp = { str[0], " " };
-                    string[] at2;
                     name_table.Add(tp);
+                }
+            }
+            check_begin = false;
+
+            foreach (string[] str in this.code)
+            {
+                if (!check_begin)
+                {
+                    check_begin = true;
+                    continue;
+                }
+                string[] check_ca = get_command_code(str);
+                if (check_ca.Length != 0) // добавить нормальную проверку на директиву
+                {
+                    command_show = true;
+                    show_ex(str);
+                }
+                if (str[0] != "_") // проверка метки, еще добавить проверку на присутствие такого в таблице
+                {
+                    string[] at2;
                     if (str.Length == 4)
                     {
                         at2 = new string[] { "Адрес", str[1], str[2], str[3] };

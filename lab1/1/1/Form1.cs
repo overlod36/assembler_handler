@@ -73,11 +73,23 @@ namespace _1
             }
         }
 
-        
+        private List<string[]> get_code_table()
+        {
+            List<string[]> st = new List<string[]>();
+            foreach (DataGridViewRow row in dataGrid_oper.Rows)
+            {
+                if (row.Cells[0].Value != null)
+                {
+                    string[] res = { row.Cells[0].Value.ToString(), row.Cells[1].Value.ToString(), row.Cells[2].Value.ToString() };
+                    st.Add(res);
+                }
+            }
+            return st;
+        }
 
         private void but_first_cycle_Click(object sender, EventArgs e)
         {
-            CodeChecker ch = new CodeChecker();
+            CodeChecker ch = new CodeChecker(get_code_table());
             ch.first_cycle(richTextBox_code.Text.Split('\n'));
             foreach (string[] st in ch.get_nt())
             {
