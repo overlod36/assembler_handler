@@ -149,7 +149,8 @@ namespace _1
                 this.address_counter = Int32.Parse(code[0][2]);
                 Console.WriteLine(this.address_counter);
             }
-            else {
+            else
+            {
                 Console.WriteLine("Неправильный начальный адрес!");
                 return;
             }
@@ -213,7 +214,7 @@ namespace _1
                                 at2 = new string[] { this.address_counter.ToString(), cd.ToString("X2"), str[2], str[3] };
                                 add_table.Add(at2);
                             }
-                            
+
 
                         }
                         else
@@ -275,7 +276,7 @@ namespace _1
                                 at3 = new string[] { this.address_counter.ToString(), cd.ToString("X2"), str[2], str[3] };
                                 add_table.Add(at3);
                             }
-                            
+
                         }
                         else
                         {
@@ -287,6 +288,7 @@ namespace _1
                 }
                 command_show = false;
             }
+
         }
     }
 }
