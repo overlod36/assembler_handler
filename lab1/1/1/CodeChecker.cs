@@ -100,13 +100,51 @@ namespace _1
             return false;
         }
 
+        private int get_dir_len(string[] cmd) // сложение 16 адресов в начале поменять 
+        {
+            int ex;
+            switch (cmd[1])
+            {
+                case "RESB":
+                    // проверка?
+                    return Int32.Parse(cmd[2]);
+                case "RESW":
+                    return Int32.Parse(cmd[2]) * 3;
+                case "WORD":
+                    // я хз, тут же можно зарезервировать больше одного? 
+                    return 3;
+                case "BYTE":
+                    if (int.TryParse(cmd[2], out ex))
+                    {
+                        if (ex < 255)
+                        {
+                            return 1;
+                        }
+                        else 
+                        {
+                            return 2;
+                        }
+                    }
+                    else if (cmd[2][0] == 'x')
+                    {
+                        return (cmd[2].Length - 1) / 2;
+                    }
+                    else if (cmd[2][0] == 'c')
+                    {
+                        return (cmd[2].Length - 3);
+                    }
+                    return 0;
+            }
+            return 0;
+        }
+
         public void first_cycle(string[] st)
         {
             bool check_begin = false;
             bool command_show = false;
             int cd;
             this.set_code(st);
-            if (check_begin_address()) // + проверка на переполнение
+            if (check_begin_address()) // + проверка на переполнение + перекинуть код на общую функцию 
             {
                 this.address_counter = Int32.Parse(code[0][2]);
                 Console.WriteLine(this.address_counter);
@@ -144,6 +182,11 @@ namespace _1
                 if (check_ca.Length != 0) // добавить нормальную проверку на директиву
                 {
                     command_show = true;
+                    this.address_counter += Int32.Parse(check_ca[1]);
+                }
+                else
+                {
+                    this.address_counter += get_dir_len(str);
                 }
                 if (str[0] != "_") // проверка метки, еще добавить проверку на присутствие такого в таблице
                 {
@@ -162,12 +205,12 @@ namespace _1
                             }
                             if (check_ca.Length == 3)
                             {
-                                at2 = new string[] { "Адрес", cd.ToString("X2"), str[3], " " };
+                                at2 = new string[] { this.address_counter.ToString(), cd.ToString("X2"), str[3], " " };
                                 add_table.Add(at2);
                             }
                             else
                             {
-                                at2 = new string[] { "Адрес", cd.ToString("X2"), str[2], str[3] };
+                                at2 = new string[] { this.address_counter.ToString(), cd.ToString("X2"), str[2], str[3] };
                                 add_table.Add(at2);
                             }
                             
@@ -175,7 +218,8 @@ namespace _1
                         }
                         else
                         {
-                            at2 = new string[] { "Адрес", str[1], str[2], str[3] };
+                            // функция, принимающая str с switch
+                            at2 = new string[] { this.address_counter.ToString(), str[1], str[2], str[3] };
                             add_table.Add(at2);
                         }
                     }
@@ -187,7 +231,8 @@ namespace _1
                         }
                         else
                         {
-                            at2 = new string[] { "Адрес", str[1], str[2], " " };
+                            // функция, принимающая str с switch
+                            at2 = new string[] { this.address_counter.ToString(), str[1], str[2], " " };
                             add_table.Add(at2);
                         }
                     }
@@ -199,12 +244,12 @@ namespace _1
                     {
                         if (command_show == true)
                         {
-                            at3 = new string[] { "Адрес", (Int32.Parse(check_ca[0]) * 4 + 1).ToString("X2"), str[2], " " };
+                            at3 = new string[] { this.address_counter.ToString(), (Int32.Parse(check_ca[0]) * 4 + 1).ToString("X2"), str[2], " " };
                             add_table.Add(at3);
                         }
                         else
                         {
-                            at3 = new string[] { "Адрес", str[1], str[2], " " };
+                            at3 = new string[] { this.address_counter.ToString(), str[1], str[2], " " };
                             add_table.Add(at3);
                         }
                     }
@@ -222,19 +267,20 @@ namespace _1
                             }
                             if (check_ca.Length == 3)
                             {
-                                at3 = new string[] { "Адрес", cd.ToString("X2"), str[3], " " };
+                                at3 = new string[] { this.address_counter.ToString(), cd.ToString("X2"), str[3], " " };
                                 add_table.Add(at3);
                             }
                             else
                             {
-                                at3 = new string[] { "Адрес", cd.ToString("X2"), str[2], str[3] };
+                                at3 = new string[] { this.address_counter.ToString(), cd.ToString("X2"), str[2], str[3] };
                                 add_table.Add(at3);
                             }
                             
                         }
                         else
                         {
-                            at3 = new string[] { "Адрес", str[1], str[2], str[3] };
+                            // функция, принимающая str с switch
+                            at3 = new string[] { this.address_counter.ToString(), str[1], str[2], str[3] };
                             add_table.Add(at3);
                         }
                     }

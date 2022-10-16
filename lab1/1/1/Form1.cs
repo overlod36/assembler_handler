@@ -106,5 +106,13 @@ namespace _1
             fill_code();
             fill_op_table();
         }
+
+        private void but_reset_Click(object sender, EventArgs e)
+        {
+            richTextBox_code.Clear();
+            dataGrid_oper.Rows.Clear();
+            dataGrid_name.Rows.Clear();
+            dataGrid_add.Rows.Clear();
+        }
     }
 }

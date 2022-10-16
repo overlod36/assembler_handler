@@ -55,6 +55,7 @@ namespace _1
             this.but_first_cycle = new System.Windows.Forms.Button();
             this.but_sec_cycle = new System.Windows.Forms.Button();
             this.but_fill_default = new System.Windows.Forms.Button();
+            this.but_reset = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGrid_oper)).BeginInit();
@@ -297,7 +298,7 @@ namespace _1
             // 
             // but_fill_default
             // 
-            this.but_fill_default.Location = new System.Drawing.Point(122, 695);
+            this.but_fill_default.Location = new System.Drawing.Point(217, 695);
             this.but_fill_default.Name = "but_fill_default";
             this.but_fill_default.Size = new System.Drawing.Size(190, 39);
             this.but_fill_default.TabIndex = 11;
@@ -305,11 +306,22 @@ namespace _1
             this.but_fill_default.UseVisualStyleBackColor = true;
             this.but_fill_default.Click += new System.EventHandler(this.but_fill_default_Click);
             // 
+            // but_reset
+            // 
+            this.but_reset.Location = new System.Drawing.Point(31, 695);
+            this.but_reset.Name = "but_reset";
+            this.but_reset.Size = new System.Drawing.Size(180, 39);
+            this.but_reset.TabIndex = 12;
+            this.but_reset.Text = "Сброс";
+            this.but_reset.UseVisualStyleBackColor = true;
+            this.but_reset.Click += new System.EventHandler(this.but_reset_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1495, 746);
+            this.Controls.Add(this.but_reset);
             this.Controls.Add(this.but_fill_default);
             this.Controls.Add(this.but_sec_cycle);
             this.Controls.Add(this.but_first_cycle);
@@ -363,6 +375,7 @@ namespace _1
         private System.Windows.Forms.Button but_sec_cycle;
         private System.Windows.Forms.RichTextBox richTextBox_code;
         private System.Windows.Forms.Button but_fill_default;
+        private System.Windows.Forms.Button but_reset;
     }
 }
 
