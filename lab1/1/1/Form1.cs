@@ -106,6 +106,17 @@ namespace _1
         private void but_first_cycle_Click(object sender, EventArgs e)
         {
             richTextBox_first_err.Clear();
+            if (String.IsNullOrEmpty(richTextBox_code.Text))
+            {
+                richTextBox_first_err.Text = "Ошибка: в поле кода пусто!";
+                return;
+            }
+
+            if (dataGrid_oper.Rows.Count <= 1 || dataGrid_oper.Rows == null)
+            {
+                richTextBox_first_err.Text = "Ошибка: таблица операций пуста!";
+                return;
+            }
             this.ch = new FinalChecker(get_code_table());
             ch.set_code(richTextBox_code.Text.Split('\n'));
             string err = ch.first_cycle();

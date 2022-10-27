@@ -21,6 +21,7 @@ namespace _1
         private string name;
         private int code_length;
         private bool begin;
+        private bool end;
         private string error;
 
         public FinalChecker(List<string[]> code_t_send)
@@ -31,6 +32,7 @@ namespace _1
             this.code_table = code_t_send;
             this.error = "";
             this.begin = false;
+            this.end = false;
         }
 
         public List<string[]> get_name_t()
@@ -204,6 +206,7 @@ namespace _1
                     }
                     break;
                 case "WORD":
+                    int ch;
                     if (line[0] == "_")
                     {
                         this.error = "Ошибка: директива WORD без метки!";
@@ -219,10 +222,18 @@ namespace _1
                         // проверка на отсутствие такой же метки в таблице + надо решить с проверкой выделения слова
                         string[] to_nt_word = { line[0], this.address_counter.ToString("X6") };
                         this.name_table.Add(to_nt_word);
-                        if (!int.TryParse(line[2], out _))
+                        if (!int.TryParse(line[2], out ch))
                         {
                             this.error = "Ошибка: Введено не число!";
                             return;
+                        }
+                        else
+                        {
+                            if (ch > 16777215)
+                            {
+                                this.error = "Ошибка: введено число меньше 16777215!";
+                                return;
+                            }
                         }
                         string[] to_at_word = { this.address_counter.ToString("X6"), line[1], line[2], " " };
                         this.add_table.Add(to_at_word);
@@ -298,11 +309,32 @@ namespace _1
                         this.error = "Ошибка: директиве END не нужна метка!";
                         return;
                     }
+
+                    if (!check_hex(line[2]))
+                    {
+                        this.error = "Ошибка: неправильный формат адреса в директиве END!";
+                        return;
+                    }
+
+                    if (line[2].Length > 6)
+                    {
+                        this.error = "Ошибка: переполнение адреса в директиве END!";
+                        return;
+                    }
+
+
                     // проверка на начальный адрес
+                    if (Convert.ToInt32(line[2], 16) != this.begin_address)
+                    {
+                        this.error = "Ошибка: адрес в директиве END не совпадает с адресом загрузки!";
+                        return;
+                    }
+
+
                     string[] to_at_end = { this.address_counter.ToString("X6"), line[1], line[2], " " };
                     this.add_table.Add(to_at_end);
                     this.last_address = this.address_counter - this.begin_address;
-                    // как-то кинуть основному циклу на конец
+                    this.end = true;
                     break;
                 default:
                     this.error = "Ошибка: неправильный формат директивы!";
@@ -397,6 +429,10 @@ namespace _1
             int i = 1;
             foreach(string[] str in this.code)
             {
+                if (end)
+                {
+                    return "(" + i.ToString() + ") Ошибка: есть код после директивы END!";
+                }
 
                 if (str.Length < 3 || str.Length > 4)
                 {
@@ -421,6 +457,7 @@ namespace _1
                     return "(" + i.ToString() + ") " + this.error;
                 }
                 i += 1;
+            
             }
             return "";
         }
