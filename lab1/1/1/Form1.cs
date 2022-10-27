@@ -105,19 +105,27 @@ namespace _1
 
         private void but_first_cycle_Click(object sender, EventArgs e)
         {
+            richTextBox_first_err.Clear();
             this.ch = new FinalChecker(get_code_table());
             ch.set_code(richTextBox_code.Text.Split('\n'));
-            ch.first_cycle();
-            foreach (string[] st in ch.get_name_t())
+            string err = ch.first_cycle();
+            if (err != "")
             {
-                dataGrid_name.Rows.Add(new object[] { st[0], st[1] });
+                richTextBox_first_err.Text = err;
             }
-            foreach (string[] st in ch.get_add_t())
+            else
             {
-                dataGrid_add.Rows.Add(new object[] { st[0], st[1], st[2], st[3] });
-            }
-            // проверка 
-            but_sec_cycle.Enabled = true;
+                foreach (string[] st in ch.get_name_t())
+                {
+                    dataGrid_name.Rows.Add(new object[] { st[0], st[1] });
+                }
+                foreach (string[] st in ch.get_add_t())
+                {
+                    dataGrid_add.Rows.Add(new object[] { st[0], st[1], st[2], st[3] });
+                }
+                // проверка 
+                but_sec_cycle.Enabled = true;
+            }   
         }
 
         private void but_fill_default_Click(object sender, EventArgs e)

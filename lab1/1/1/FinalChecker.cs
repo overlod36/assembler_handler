@@ -21,6 +21,7 @@ namespace _1
         private string name;
         private int code_length;
         private bool begin;
+        private string error;
 
         public FinalChecker(List<string[]> code_t_send)
         {
@@ -28,6 +29,7 @@ namespace _1
             this.name_table = new List<string[]>();
             this.add_table = new List<string[]>();
             this.code_table = code_t_send;
+            this.error = "";
             this.begin = false;
         }
 
@@ -51,7 +53,17 @@ namespace _1
             foreach (var str in code_t_send) // проверка на пустые строки + (< 2)
             {
                 // проверка на пустые строки в самих передаваемых строках
-                this.code.Add(str.Split());
+                if (str[0] == ' ')
+                {
+                    string[] r1 = {"_"};
+                    string[] r2 = str.Split().Skip(1).ToArray();
+                    this.code.Add(r1.Concat(r2).ToArray());
+                }
+                else
+                {
+                    this.code.Add(str.Split());
+                }
+                
             }
         }
 
@@ -80,6 +92,16 @@ namespace _1
             return false;
         }
 
+        private bool check_hex(string num)
+        {
+            foreach (char ch in num)
+            {
+                if (!((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F')))
+                    return false;
+            }
+            return true;
+        }
+
         private void pc_filler(string[] line)
         {
             int ex, add = 0;
@@ -88,14 +110,27 @@ namespace _1
                 case "START":
                     if (begin)
                     {
-                        // ошибка, уже есть START
+                        this.error = "Ошибка: директива START уже имеется в коде!";
+                        return;
                     }
                     else
                     {
                         this.name = line[0];
-                        // проверка адреса на переполнение и число
-                        this.address_counter = Int32.Parse(line[2]); // hex
-                        this.begin_address = Int32.Parse(line[2]);
+                        
+                        if (!check_hex(line[2]))
+                        {
+                            this.error = "Ошибка: неправильный формат адреса загрузки!";
+                            return;
+                        }
+                        
+                        if (line[2].Length > 6)
+                        {
+                            this.error = "Ошибка: переполнение адреса загрузки!";
+                            return;
+                        }
+                        this.address_counter = Convert.ToInt32(line[2], 16); // hex
+                        this.begin_address = Convert.ToInt32(line[2], 16);
+                        this.begin = true;
                     }
                     break;
                 case "RESB":
@@ -271,7 +306,7 @@ namespace _1
             
         }
 
-        public void first_cycle()
+        public string first_cycle()
         {
             foreach(string[] str in this.code)
             {
@@ -288,7 +323,12 @@ namespace _1
                     // ошибка
                 }
                 // если проверить begin, и там ничего не будет, то ошибка
+                if (this.error != "")
+                {
+                    return this.error;
+                }
             }
+            return "";
         }
 
         public void second_cycle()
