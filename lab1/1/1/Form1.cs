@@ -14,6 +14,7 @@ namespace _1
     public partial class Form1 : Form
     {
         private string path = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
+        private FinalChecker ch;
         public Form1()
         {
             InitializeComponent();
@@ -49,6 +50,21 @@ namespace _1
                 n2 = "";
             }
 
+        }
+
+        private void fill_final_code(List<string[]> st)
+        {
+            bool ret = false;
+            foreach (string[] el in st)
+            {
+                if (!ret)
+                {
+                    richTextBox_bin_code.AppendText(string.Join(" ", el));
+                    ret = true;
+                }
+                else
+                    richTextBox_bin_code.AppendText(Environment.NewLine + string.Join(" ", el));
+            }
         }
 
         private void fill_code()
@@ -89,7 +105,7 @@ namespace _1
 
         private void but_first_cycle_Click(object sender, EventArgs e)
         {
-            FinalChecker ch = new FinalChecker(get_code_table());
+            this.ch = new FinalChecker(get_code_table());
             ch.set_code(richTextBox_code.Text.Split('\n'));
             ch.first_cycle();
             foreach (string[] st in ch.get_name_t())
@@ -100,6 +116,8 @@ namespace _1
             {
                 dataGrid_add.Rows.Add(new object[] { st[0], st[1], st[2], st[3] });
             }
+            // проверка 
+            but_sec_cycle.Enabled = true;
         }
 
         private void but_fill_default_Click(object sender, EventArgs e)
@@ -114,6 +132,15 @@ namespace _1
             dataGrid_oper.Rows.Clear();
             dataGrid_name.Rows.Clear();
             dataGrid_add.Rows.Clear();
+            richTextBox_bin_code.Clear();
+            but_sec_cycle.Enabled = false;
+        }
+
+        private void but_sec_cycle_Click(object sender, EventArgs e)
+        {
+            ch.second_cycle();
+            this.fill_final_code(ch.get_final_t());
+
         }
     }
 }

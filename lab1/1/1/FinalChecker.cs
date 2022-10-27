@@ -8,13 +8,17 @@ namespace _1
 {
     class FinalChecker
     {
+        private int begin_address;
+        private int last_address;
         private int address_counter;
         private List<string[]> code;
         private List<string[]> name_table;
         private List<string[]> add_table;
         private List<string[]> code_table;
+        private List<string[]> final_table;
         private string[] registers = { "R1", "R2", "R3", "R4" };
         private string[] p_c = { "START", "END", "RESW", "WORD", "RESB", "BYTE" };
+        private string name;
         private int code_length;
         private bool begin;
 
@@ -35,6 +39,11 @@ namespace _1
         public List<string[]> get_add_t()
         {
             return this.add_table;
+        }
+
+        public List<string[]> get_final_t()
+        {
+            return this.final_table;
         }
 
         public void set_code(string[] code_t_send)
@@ -83,8 +92,10 @@ namespace _1
                     }
                     else
                     {
+                        this.name = line[0];
                         // проверка адреса на переполнение и число
                         this.address_counter = Int32.Parse(line[2]); // hex
+                        this.begin_address = Int32.Parse(line[2]);
                     }
                     break;
                 case "RESB":
@@ -173,6 +184,7 @@ namespace _1
                     // проверка на начальный адрес
                     string[] to_at_end = { this.address_counter.ToString("X6"), line[1], line[2], " " };
                     this.add_table.Add(to_at_end);
+                    this.last_address = this.address_counter - this.begin_address;
                     // как-то кинуть основному циклу на конец
                     break;
             }
@@ -211,6 +223,18 @@ namespace _1
                 }
             }
             return wr; // нет команды
+        }
+
+        private string get_dir_address(string dir)
+        {
+            foreach(string[] el in this.name_table)
+            {
+                if (el[0] == dir)
+                {
+                    return el[1];
+                }
+            }
+            return ""; // ошибка
         }
 
 
@@ -264,6 +288,79 @@ namespace _1
                     // ошибка
                 }
                 // если проверить begin, и там ничего не будет, то ошибка
+            }
+        }
+
+        public void second_cycle()
+        {
+            this.final_table = new List<string[]>();
+            string[] st = { "H", this.name, this.begin_address.ToString("X6"), this.last_address.ToString("X6") };
+            this.final_table.Add(st);
+            foreach (string[] str in this.add_table)
+            {
+                switch (str[1])
+                {
+                    case "RESB":
+                        string[] at_resb = { "T", str[0], Convert.ToInt32(str[2]).ToString("X")};
+                        this.final_table.Add(at_resb);
+                        break;
+                    case "RESW":
+                        string[] at_resw = { "T", str[0], (Convert.ToInt32(str[2])*3).ToString("X") };
+                        this.final_table.Add(at_resw);
+                        break;
+                    case "WORD":
+                        string[] at_word = { "T", str[0], "06", (Convert.ToInt32(str[2])).ToString("X6")};
+                        this.final_table.Add(at_word);
+                        break;
+                    case "END":
+                        string[] last = { "E", begin_address.ToString("X6") };
+                        this.final_table.Add(last);
+                        break;
+                    case "BYTE":
+                        string[] at_byte = { "T", str[0], " | ", "BYTE"};
+                        if (str[2][0] == 'c')
+                        {
+                            byte[] ba = Encoding.Default.GetBytes(str[2].Substring(2, str[2].Length - 3));
+                            at_byte[3] = BitConverter.ToString(ba).Replace("-", "");
+                            at_byte[2] = at_byte[3].Length.ToString("X2");
+                        }
+                        else if(str[2][0] == 'x')
+                        {
+                            at_byte[2] = str[2].Substring(1, str[2].Length - 1).Length.ToString("X2");
+                            at_byte[3] = str[2].Substring(1, str[2].Length - 1);
+                        }
+                        else
+                        {
+                            at_byte[3] = Convert.ToInt32(str[2]).ToString("X");
+                            at_byte[2] = at_byte[3].Length.ToString("X2");
+                        }
+                        this.final_table.Add(at_byte);
+                        break;
+                    default:
+                        if (str.Length == 3)
+                        {
+                            string[] at_st = { "T", str[0], " | ", str[1], str[2] };
+                            this.final_table.Add(at_st);
+                        }
+                        else
+                        {
+                            string[] at_st = { "T", str[0], " | ", str[1], str[2], str[3] };
+                            if (this.registers.Contains(at_st[4]) && this.registers.Contains(at_st[5]))
+                            {
+                                at_st[4] = at_st[4][1].ToString();
+                                at_st[5] = at_st[5][1].ToString();
+                                at_st[2] = (at_st[3].Length + 2).ToString("X2");
+                            }
+                            else
+                            {
+                                at_st[3] = str[1];
+                                at_st[4] = get_dir_address(str[2]);
+                                at_st[2] = (at_st[3].Length + at_st[4].Length).ToString("X2");
+                            }
+                            this.final_table.Add(at_st);
+                        }
+                        break;
+                }
             }
         }
 

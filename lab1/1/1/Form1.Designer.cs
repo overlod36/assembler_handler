@@ -289,12 +289,14 @@ namespace _1
             // 
             // but_sec_cycle
             // 
+            this.but_sec_cycle.Enabled = false;
             this.but_sec_cycle.Location = new System.Drawing.Point(1238, 676);
             this.but_sec_cycle.Name = "but_sec_cycle";
             this.but_sec_cycle.Size = new System.Drawing.Size(126, 38);
             this.but_sec_cycle.TabIndex = 10;
             this.but_sec_cycle.Text = "Второй проход";
             this.but_sec_cycle.UseVisualStyleBackColor = true;
+            this.but_sec_cycle.Click += new System.EventHandler(this.but_sec_cycle_Click);
             // 
             // but_fill_default
             // 
