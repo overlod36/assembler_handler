@@ -78,6 +78,11 @@ namespace _1
 
         private bool check_command(string[] line)
         {
+            if (line.Length == 4 && line[0] != "_" && mark_in(line[0]))
+            {
+                this.error = "Ошибка: метки " + line[0] + " нет в таблице символических имен!";
+                return false;
+            }
             foreach (string[] st in this.code_table)
             {
                 if (st[0] == (line[1] + " "))
@@ -100,6 +105,18 @@ namespace _1
                     return false;
             }
             return true;
+        }
+
+        private bool mark_in(string mark)
+        {
+            foreach (string[] str in this.name_table)
+            {
+                if (str[0] == mark)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private void pc_filler(string[] line)
@@ -136,13 +153,24 @@ namespace _1
                 case "RESB":
                     if (line[0] == "_")
                     {
-                        // ошибка, директива без метки
+                        this.error = "Ошибка: директива RESB без метки!";
+                        return;
                     }
                     else
                     {
+                        if (mark_in(line[0]))
+                        {
+                            this.error = "Ошибка: " + line[0] + " уже есть в таблице символических имен!";
+                            return;
+                        }
                         // проверка на отсутствие такой же метки в таблице + число
                         string[] to_nt_resb = { line[0], this.address_counter.ToString("X6") };
                         this.name_table.Add(to_nt_resb);
+                        if (!int.TryParse(line[2], out _))
+                        {
+                            this.error = "Ошибка: Введено не число!";
+                            return;
+                        }
                         string[] to_at_resb = { this.address_counter.ToString("X6"), line[1], line[2], " " };
                         this.add_table.Add(to_at_resb);
                         this.address_counter += (Int32.Parse(line[2]));
@@ -151,13 +179,25 @@ namespace _1
                 case "RESW":
                     if (line[0] == "_")
                     {
-                        // ошибка директивы
+                        this.error = "Ошибка: директива RESW без метки!";
+                        return;
                     }
                     else
                     {
+                        if (mark_in(line[0]))
+                        {
+                            this.error = "Ошибка: " + line[0] + " уже есть в таблице символических имен!";
+                            return;
+                        }
                         // проверка на отсутствие такой же метки в таблице + число
                         string[] to_nt_resw = { line[0], this.address_counter.ToString("X6") };
                         this.name_table.Add(to_nt_resw);
+
+                        if (!int.TryParse(line[2], out _))
+                        {
+                            this.error = "Ошибка: Введено не число!";
+                            return;
+                        }
                         string[] to_at_resw = { this.address_counter.ToString("X6"), line[1], line[2], " " };
                         this.add_table.Add(to_at_resw);
                         this.address_counter += (Int32.Parse(line[2]) * 3);
@@ -166,41 +206,79 @@ namespace _1
                 case "WORD":
                     if (line[0] == "_")
                     {
-                        // ошибка директивы
+                        this.error = "Ошибка: директива WORD без метки!";
+                        return;
                     }
                     else
                     {
+                        if (mark_in(line[0]))
+                        {
+                            this.error = "Ошибка: " + line[0] + " уже есть в таблице символических имен!";
+                            return;
+                        }
                         // проверка на отсутствие такой же метки в таблице + надо решить с проверкой выделения слова
                         string[] to_nt_word = { line[0], this.address_counter.ToString("X6") };
                         this.name_table.Add(to_nt_word);
+                        if (!int.TryParse(line[2], out _))
+                        {
+                            this.error = "Ошибка: Введено не число!";
+                            return;
+                        }
                         string[] to_at_word = { this.address_counter.ToString("X6"), line[1], line[2], " " };
                         this.add_table.Add(to_at_word);
                         this.address_counter += 3;
                     }
                     break;
                 case "BYTE":
+                    int tr;
                     if (line[0] == "_")
                     {
-                        // ошибка директивы
+                        this.error = "Ошибка: директива BYTE без метки!";
+                        return;
                     }
                     else
                     {
+                        if (mark_in(line[0]))
+                        {
+                            this.error = "Ошибка: " + line[0] + " уже есть в таблице символических имен!";
+                            return;
+                        }
                         // проверка на отсутствие такой же метки в таблице + если число - число
                         string[] to_nt_byte = { line[0], this.address_counter.ToString("X6") };
                         this.name_table.Add(to_nt_byte);
+                        if (line[2][0] != 'c' && line[2][0] != 'x' && !int.TryParse(line[2], out _))
+                        {
+                            this.error = "Ошибка: неверный формат константы!";
+                            return;
+                        }
+
+                        if (line[2][0] == 'c' && (line[2][1] != '\'' || line[2][line[2].Length-1] != '\''))
+                        {
+                            this.error = "Ошибка: неверный формат константы, нужны кавычки!";
+                            return;
+                        }
+
+                        if (line[2][0] == 'x' && !check_hex(line[2].Substring(1)))
+                        {
+                            this.error = "Ошибка: неверный формат константы, введите 16-ричное число!";
+                            return;
+                        }
+
+                        if (int.TryParse(line[2], out tr))
+                        {
+                            if (tr > 255)
+                            {
+                                this.error = "Ошибка: введите число меньше 256!";
+                                return;
+                            }
+                        }
+
                         string[] to_at_byte = { this.address_counter.ToString("X6"), line[1], line[2], " " };
                         this.add_table.Add(to_at_byte);
 
-                        if (int.TryParse(line[2], out ex))
+                        if (int.TryParse(line[2], out _))
                         {
-                            if (ex < 255)
-                            {
-                                add = 1;
-                            }
-                            else
-                            {
-                                add = 2;
-                            }
+                            add = 1;
                         }
                         else if (line[2][0] == 'x')
                         {
@@ -215,13 +293,20 @@ namespace _1
                     }
                     break;
                 case "END":
-                    // если метка, то ошибка
+                    if (line[0] != "_")
+                    {
+                        this.error = "Ошибка: директиве END не нужна метка!";
+                        return;
+                    }
                     // проверка на начальный адрес
                     string[] to_at_end = { this.address_counter.ToString("X6"), line[1], line[2], " " };
                     this.add_table.Add(to_at_end);
                     this.last_address = this.address_counter - this.begin_address;
                     // как-то кинуть основному циклу на конец
                     break;
+                default:
+                    this.error = "Ошибка: неправильный формат директивы!";
+                    return;
             }
         }
 
@@ -269,6 +354,7 @@ namespace _1
                     return el[1];
                 }
             }
+            this.error = "Ошибка: " + dir + " отсутствует в таблице имен!";
             return ""; // ошибка
         }
 
@@ -308,8 +394,15 @@ namespace _1
 
         public string first_cycle()
         {
+            int i = 1;
             foreach(string[] str in this.code)
             {
+
+                if (str.Length < 3 || str.Length > 4)
+                {
+                    return "(" + i.ToString() + ") Ошибка: неправильный формат команды/директивы!";
+                }
+
                 if (check_pc(str[1]))
                 {
                     pc_filler(str);
@@ -320,19 +413,21 @@ namespace _1
                 }
                 else
                 {
-                    // ошибка
+                    return "(" + i.ToString() + ") Ошибка: команда/директива не была найдена!";
                 }
                 // если проверить begin, и там ничего не будет, то ошибка
                 if (this.error != "")
                 {
-                    return this.error;
+                    return "(" + i.ToString() + ") " + this.error;
                 }
+                i += 1;
             }
             return "";
         }
 
-        public void second_cycle()
+        public string second_cycle()
         {
+            int i = 1;
             this.final_table = new List<string[]>();
             string[] st = { "H", this.name, this.begin_address.ToString("X6"), this.last_address.ToString("X6") };
             this.final_table.Add(st);
@@ -401,7 +496,13 @@ namespace _1
                         }
                         break;
                 }
+                if (this.error != "")
+                {
+                    return "(" + i.ToString() + ") " + this.error;
+                }
+                i += 1;
             }
+            return "";
         }
 
     }

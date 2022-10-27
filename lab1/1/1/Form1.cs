@@ -125,6 +125,7 @@ namespace _1
                 }
                 // проверка 
                 but_sec_cycle.Enabled = true;
+                but_first_cycle.Enabled = false;
             }   
         }
 
@@ -132,6 +133,7 @@ namespace _1
         {
             fill_code();
             fill_op_table();
+            but_fill_default.Enabled = false;
         }
 
         private void but_reset_Click(object sender, EventArgs e)
@@ -142,13 +144,22 @@ namespace _1
             dataGrid_add.Rows.Clear();
             richTextBox_bin_code.Clear();
             but_sec_cycle.Enabled = false;
+            but_first_cycle.Enabled = true;
+            but_fill_default.Enabled = true;
         }
 
         private void but_sec_cycle_Click(object sender, EventArgs e)
         {
-            ch.second_cycle();
-            this.fill_final_code(ch.get_final_t());
-
+            string err = ch.second_cycle();
+            if (err != "")
+            {
+                richTextBox_sec_err.Text = err;
+            }
+            else
+            {
+                this.fill_final_code(ch.get_final_t());
+                but_sec_cycle.Enabled = false;
+            }
         }
     }
 }
