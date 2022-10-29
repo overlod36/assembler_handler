@@ -110,6 +110,8 @@ namespace _1
             string res;
             foreach (var str in code_t_send) // проверка на пустые строки + (< 2)
             {
+                if (str.Length == 0)
+                    continue;
                 // проверка на пустые строки в самих передаваемых строках
                 if (str[0] == ' ')
                 {
@@ -234,6 +236,18 @@ namespace _1
                     else
                     {
                         this.name = line[0];
+
+                        if (line.Length == 2)
+                        {
+                            this.error = "Ошибка: отсутствует загрузочный адрес!";
+                            return;
+                        }
+
+                        if (line[2] == "0")
+                        {
+                            this.error = "Ошибка: загрузочный адрес не может быть равен 0!";
+                            return;
+                        }
                         
                         if (!check_hex(line[2]))
                         {
@@ -429,6 +443,15 @@ namespace _1
                         return;
                     }
 
+                    if(line.Length == 2)
+                    {
+                        string[] to_end = { this.address_counter.ToString("X6"), line[1], this.begin_address.ToString("X"), " " };
+                        this.add_table.Add(to_end);
+                        this.last_address = this.address_counter - this.begin_address;
+                        this.end = true;
+                        return;
+                    }
+
                     if (!check_hex(line[2]))
                     {
                         this.error = "Ошибка: неправильный формат адреса в директиве END!";
@@ -553,22 +576,19 @@ namespace _1
                     return "(" + i.ToString() + ") Ошибка: есть код после директивы END!";
                 }
 
-                if (str.Length < 3 || str.Length > 4)
-                {
-                    return "(" + i.ToString() + ") Ошибка: неправильный формат команды/директивы!";
-                }
 
                 if (check_pc(str[1]))
                 {
                     pc_filler(str);
                 }
-                if (this.error != "")
-                {
-                    return "(" + i.ToString() + ") " + this.error;
-                }
                 else if (check_command(str))
                 {
                     command_filler(str);
+                }
+                else
+                {
+                    Console.WriteLine("BEE");
+                    this.error = "Ошибка: неправильный формат команды/директивы!";
                 }
                 
                 // если проверить begin, и там ничего не будет, то ошибка
