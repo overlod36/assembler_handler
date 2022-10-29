@@ -50,8 +50,64 @@ namespace _1
             return this.final_table;
         }
 
+        private bool check_spaces(string st)
+        {
+            int cnt = 0;
+            foreach (char el in st)
+            {
+                if (el == '\'')
+                {
+                    cnt += 1;
+                }
+            }
+            if (cnt >= 2)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private void print_arr(string[] array)
+        {
+            Console.WriteLine("[{0}]", string.Join(", ", array));
+        }
+
+        private string[] wizzard(string res)
+        {
+            int ct = 0, ct1 = 0;
+            int index1 = 0, index2 = 0;
+            for (int i = 0; i < res.Length; i++)
+            {
+                if (res[i] == '\'')
+                {
+                    ct += 1;
+                }
+            }
+
+            for (int i=0; i < res.Length; i++)
+            {
+                if (res[i] == '\'' && ct1 == 0)
+                {
+                    index1 = i;
+                    ct1 += 1;
+                    continue;
+                }
+                if (res[i] == '\'' && ct1 == (ct - 1))
+                {
+                    index2 = i;
+                    break;
+                }
+            }
+            string[] rt = { res.Substring(0, index1), res.Substring(index1 + 1, res.Length - index1-2 ) };
+            return rt;
+
+        }
+
+
         public void set_code(string[] code_t_send)
         {
+            string[] dg_nail, rest;
+            string res;
             foreach (var str in code_t_send) // проверка на пустые строки + (< 2)
             {
                 // проверка на пустые строки в самих передаваемых строках
@@ -63,7 +119,19 @@ namespace _1
                 }
                 else
                 {
-                    this.code.Add(str.Split());
+                    if (check_spaces(str))
+                    {
+                        dg_nail = wizzard(str);
+                        rest = dg_nail[0].Split();
+                        print_arr(dg_nail);
+                        rest[rest.Length - 1] = rest[rest.Length - 1] + "'" + dg_nail[dg_nail.Length - 1] + "'";
+                        this.code.Add(rest);
+                    }
+                    else
+                    {
+                        this.code.Add(str.Split());
+                    }
+                    
                 }
                 
             }
@@ -80,11 +148,22 @@ namespace _1
 
         private bool check_command(string[] line)
         {
-            if (line.Length == 4 && line[0] != "_" && mark_in(line[0]))
+            if (!check_str(line[1]))
             {
-                this.error = "Ошибка: метки " + line[0] + " нет в таблице символических имен!";
+                this.error = "Ошибка: некорректное имя команды/директивы!";
                 return false;
             }
+            if (line.Length == 4 && line[0] != "_" && mark_in(line[0]))
+            {
+                this.error = "Ошибка: метка " + line[0] + " уже есть в таблице символических имен!";
+                return false;
+            }
+            if (line.Length == 4 && line[0] != "_" && !check_str(line[0]))
+            {
+                this.error = "Ошибка: некорректное имя метки!";
+                return false;
+            }
+            
             foreach (string[] st in this.code_table)
             {
                 if (st[0] == (line[1] + " "))
@@ -105,6 +184,26 @@ namespace _1
             {
                 if (!((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F')))
                     return false;
+            }
+            return true;
+        }
+
+        private bool check_str(string mark)
+        {
+            bool begin = true;
+            foreach (char el in mark)
+            {
+                if (begin && (el >= '0' && el <= '9'))
+                {
+                    this.error = "Ошибка: некорректное имя метки/команды, первый символ - цифра!";
+                    return false;
+                }
+                if (begin && el == '_')
+                {
+                    this.error = "Ошибка: некорректное имя метки/команды!";
+                    return false;
+                }
+                begin = false;
             }
             return true;
         }
@@ -158,6 +257,11 @@ namespace _1
                         this.error = "Ошибка: директива RESB без метки!";
                         return;
                     }
+                    if (!check_str(line[0]))
+                    {
+                        this.error = "Ошибка: некорректное имя метки!";
+                        return;
+                    }
                     else
                     {
                         if (mark_in(line[0]))
@@ -182,6 +286,11 @@ namespace _1
                     if (line[0] == "_")
                     {
                         this.error = "Ошибка: директива RESW без метки!";
+                        return;
+                    }
+                    if (!check_str(line[0]))
+                    {
+                        this.error = "Ошибка: некорректное имя метки!";
                         return;
                     }
                     else
@@ -210,6 +319,11 @@ namespace _1
                     if (line[0] == "_")
                     {
                         this.error = "Ошибка: директива WORD без метки!";
+                        return;
+                    }
+                    if (!check_str(line[0]))
+                    {
+                        this.error = "Ошибка: некорректное имя метки!";
                         return;
                     }
                     else
@@ -245,6 +359,11 @@ namespace _1
                     if (line[0] == "_")
                     {
                         this.error = "Ошибка: директива BYTE без метки!";
+                        return;
+                    }
+                    if (!check_str(line[0]))
+                    {
+                        this.error = "Ошибка: некорректное имя метки!";
                         return;
                     }
                     else
@@ -390,7 +509,6 @@ namespace _1
             return ""; // ошибка
         }
 
-
         private void command_filler(string[] line)
         {
             if (line[0] != "_")
@@ -429,6 +547,7 @@ namespace _1
             int i = 1;
             foreach(string[] str in this.code)
             {
+                
                 if (end)
                 {
                     return "(" + i.ToString() + ") Ошибка: есть код после директивы END!";
@@ -443,14 +562,15 @@ namespace _1
                 {
                     pc_filler(str);
                 }
+                if (this.error != "")
+                {
+                    return "(" + i.ToString() + ") " + this.error;
+                }
                 else if (check_command(str))
                 {
                     command_filler(str);
                 }
-                else
-                {
-                    return "(" + i.ToString() + ") Ошибка: команда/директива не была найдена!";
-                }
+                
                 // если проверить begin, и там ничего не будет, то ошибка
                 if (this.error != "")
                 {
