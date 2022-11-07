@@ -152,6 +152,7 @@ namespace _1
             dataGrid_name.Rows.Clear();
             dataGrid_add.Rows.Clear();
             richTextBox_bin_code.Clear();
+            richTextBox_sec_err.Clear();
             but_sec_cycle.Enabled = false;
             but_first_cycle.Enabled = true;
             but_fill_default.Enabled = true;

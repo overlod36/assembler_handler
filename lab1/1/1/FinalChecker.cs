@@ -468,8 +468,11 @@ namespace _1
                     // проверка на начальный адрес
                     if (Convert.ToInt32(line[2], 16) != this.begin_address)
                     {
-                        this.error = "Ошибка: адрес в директиве END не совпадает с адресом загрузки!";
-                        return;
+                        if (Convert.ToInt32(line[2], 16) < this.begin_address)
+                        {
+                            this.error = "Ошибка: неправильный адрес точки входа!";
+                            return;
+                        }
                     }
 
 
@@ -567,6 +570,15 @@ namespace _1
 
         public string first_cycle()
         {
+
+            foreach (string[] el in this.code_table)
+            {
+                if (!check_str(el[0]) || !check_hex(el[1]) || !int.TryParse(el[2], out _))
+                {
+                    return "Ошибка: недопустимые значения в таблице кодов операций!";
+                }
+            }
+
             int i = 1;
             foreach(string[] str in this.code)
             {
@@ -576,6 +588,10 @@ namespace _1
                     return "(" + i.ToString() + ") Ошибка: есть код после директивы END!";
                 }
 
+                if (str.Length > 4 || str.Length < 2)
+                {
+                    return "(" + i.ToString() + ") Ошибка: слишком большое количество команд/аргументов!";
+                }
 
                 if (check_pc(str[1]))
                 {
@@ -625,7 +641,13 @@ namespace _1
                         this.final_table.Add(at_word);
                         break;
                     case "END":
-                        string[] last = { "E", begin_address.ToString("X6") };
+                        if (Convert.ToInt32(str[2], 16) > (this.last_address + this.begin_address))
+                        {
+                            Console.WriteLine(code_length);
+                            this.error = "Ошибка: неправильный адрес загрузки!";
+                            break;
+                        }
+                        string[] last = { "E", str[2] };
                         this.final_table.Add(last);
                         break;
                     case "BYTE":
