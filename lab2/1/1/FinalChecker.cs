@@ -517,8 +517,17 @@ namespace _1
                             return res1;
                         }
                     }
-                    int[] res2 = { Int32.Parse(st[1]) * 4 + 1, Int32.Parse(st[2]) };
-                    return res2; // проверка таблицы в самом начале???
+                    if (line[2][0] == '$')
+                    {
+                        int[] res2 = { Int32.Parse(st[1]) * 4 + 2, Int32.Parse(st[2]) };
+                        return res2;
+                    }
+                    else
+                    {
+                        int[] res2 = { Int32.Parse(st[1]) * 4 + 1, Int32.Parse(st[2]) };
+                        return res2;
+                    }
+                       
                 }
                 else if (st[0] == (line[1] + " " + line[2] + " "))
                 {
@@ -559,6 +568,7 @@ namespace _1
             {
                 int[] r1 = get_command_code(line);
                 string[] to_at = { this.address_counter.ToString("X6"), r1[0].ToString("X2"), line[2], " " };
+                print_arr(to_at);
                 this.add_table.Add(to_at);
                 this.address_counter += (r1[1]);
             }
@@ -566,6 +576,7 @@ namespace _1
             {
                 int[] r2 = get_command_code(line);
                 string[] to_at = { this.address_counter.ToString("X6"), r2[0].ToString("X2"), line[2], line[3] };
+                print_arr(to_at);
                 this.add_table.Add(to_at);
                 this.address_counter += (r2[1]);
             }
@@ -573,6 +584,7 @@ namespace _1
             {
                 int[] r3 = get_command_code(line);
                 string[] to_at = { this.address_counter.ToString("X6"), r3[0].ToString("X2"), line[3], " " };
+                print_arr(to_at);
                 this.add_table.Add(to_at);
                 this.address_counter += (r3[1]);
             }
@@ -705,7 +717,11 @@ namespace _1
                             {
                                 if (str[2][0] == '$')
                                 {
-                                    at_st[4] = (Convert.ToInt32(get_dir_address(str[2]), 16) - Convert.ToInt32(this.add_table.SkipWhile(x => x != str).Skip(1).DefaultIfEmpty(add_table[0]).FirstOrDefault()[0], 16)).ToString("X4");
+                                    at_st[4] = (Convert.ToInt32(get_dir_address(str[2]), 16) - Convert.ToInt32(this.add_table.SkipWhile(x => x != str).Skip(1).DefaultIfEmpty(add_table[0]).FirstOrDefault()[0], 16)).ToString("X6");
+                                    if (at_st[4].Length > 6)
+                                    {
+                                        at_st[4] = at_st[4].Substring(2);
+                                    }
                                 }
                                 else
                                 {
