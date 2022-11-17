@@ -15,6 +15,7 @@ namespace _1
     {
         private string path = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
         private FinalChecker ch;
+        private int type;
         public Form1()
         {
             InitializeComponent();
@@ -75,14 +76,17 @@ namespace _1
             if (ch == "Прямая адресация")
             {
                 st = path + "\\" + path.Split('\\').Last() + "\\res\\default_code1.txt";
+                this.type = 1;
             }
             else if (ch == "Относительная адресация")
             {
                 st = path + "\\" + path.Split('\\').Last() + "\\res\\default_code2.txt";
+                this.type = 2;
             }
             else
             {
                 st = path + "\\" + path.Split('\\').Last() + "\\res\\default_code3.txt";
+                this.type = 3;
             }
             foreach (string line in System.IO.File.ReadLines(st))
             {
@@ -126,6 +130,7 @@ namespace _1
             }
             this.ch = new FinalChecker(get_code_table());
             ch.set_code(richTextBox_code.Text.Split('\n'));
+            ch.set_type(this.type);
             string err = ch.first_cycle();
             if (err != "")
             {

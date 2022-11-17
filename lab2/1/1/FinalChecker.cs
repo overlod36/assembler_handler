@@ -17,12 +17,13 @@ namespace _1
         private List<string[]> code_table;
         private List<string> m_table;
         private List<string[]> final_table;
-        private string[] registers = { "R1", "R2", "R3", "R4" };
+        private string[] registers = { "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12", "R13", "R14", "R15" };
         private string[] p_c = { "START", "END", "RESW", "WORD", "RESB", "BYTE" };
         private string name;
         private int code_length;
         private bool begin;
         private bool end;
+        private int type;
         private string error;
 
         public FinalChecker(List<string[]> code_t_send)
@@ -35,6 +36,11 @@ namespace _1
             this.error = "";
             this.begin = false;
             this.end = false;
+        }
+
+        public void set_type(int tp)
+        {
+            this.type = tp;
         }
 
         public List<string[]> get_name_t()
@@ -132,7 +138,7 @@ namespace _1
                     {
                         dg_nail = wizzard(str);
                         rest = dg_nail[0].Split();
-                        print_arr(dg_nail);
+                        //print_arr(dg_nail);
                         rest[rest.Length - 1] = rest[rest.Length - 1] + "'" + dg_nail[dg_nail.Length - 1] + "'";
                         this.code.Add(rest);
                     }
@@ -157,19 +163,25 @@ namespace _1
 
         private bool check_command(string[] line)
         {
+            print_arr(line);
             if (!check_str(line[1]))
             {
                 this.error = "Ошибка: некорректное имя команды/директивы!";
                 return false;
             }
-            if (line.Length == 4 && line[0] != "_" && mark_in(line[0]))
+            if (line.Length == 3 && line[0] != "_" && mark_in(line[0]))
             {
                 this.error = "Ошибка: метка " + line[0] + " уже есть в таблице символических имен!";
                 return false;
             }
-            if (line.Length == 4 && line[0] != "_" && !check_str(line[0]))
+            if (line.Length == 3 && line[0] != "_" && !check_str(line[0]))
             {
                 this.error = "Ошибка: некорректное имя метки!";
+                return false;
+            }
+            if (this.registers.Contains(line[0]))
+            {
+                this.error = "Ошибка: имя метки зарезирвированно!";
                 return false;
             }
             
@@ -517,6 +529,19 @@ namespace _1
                             return res1;
                         }
                     }
+
+                    Console.WriteLine(line[2]);
+
+                    
+
+                    if (line[2][0] == '$' && this.type == 1 && !Int32.TryParse(line[2][1].ToString(), out _))
+                    {
+                        this.error = "Ошибка: относительная адресация при примере прямой адресации!";
+                    }
+                    if (line[2][0] != '$' && this.type == 2 && !Int32.TryParse(line[2][0].ToString(), out _))
+                    {
+                        this.error = "Ошибка: прямая адресация при примере относительной адресации!";
+                    }
                     if (line[2][0] == '$')
                     {
                         int[] res2 = { Int32.Parse(st[1]) * 4 + 2, Int32.Parse(st[2]) };
@@ -568,7 +593,6 @@ namespace _1
             {
                 int[] r1 = get_command_code(line);
                 string[] to_at = { this.address_counter.ToString("X6"), r1[0].ToString("X2"), line[2], " " };
-                print_arr(to_at);
                 this.add_table.Add(to_at);
                 this.address_counter += (r1[1]);
             }
@@ -576,7 +600,6 @@ namespace _1
             {
                 int[] r2 = get_command_code(line);
                 string[] to_at = { this.address_counter.ToString("X6"), r2[0].ToString("X2"), line[2], line[3] };
-                print_arr(to_at);
                 this.add_table.Add(to_at);
                 this.address_counter += (r2[1]);
             }
@@ -584,7 +607,6 @@ namespace _1
             {
                 int[] r3 = get_command_code(line);
                 string[] to_at = { this.address_counter.ToString("X6"), r3[0].ToString("X2"), line[3], " " };
-                print_arr(to_at);
                 this.add_table.Add(to_at);
                 this.address_counter += (r3[1]);
             }
@@ -624,11 +646,11 @@ namespace _1
                 {
                     command_filler(str);
                 }
-                else
-                {
-                    Console.WriteLine("BEE");
-                    this.error = "Ошибка: неправильный формат команды/директивы!";
-                }
+                //else
+                //{
+                  //  Console.WriteLine("BEE");
+                  //  this.error = "Ошибка: неправильный формат команды/директивы!";
+                //}
                 
                 // если проверить begin, и там ничего не будет, то ошибка
                 if (this.error != "")
@@ -717,6 +739,20 @@ namespace _1
                             {
                                 if (str[2][0] == '$')
                                 {
+                                    if (Int32.TryParse(str[2][1].ToString(), out _)) {
+                                        this.error = "Ошибка: неправильный формат метки!";
+                                        break;
+                                    }
+                                    if (this.registers.Contains(str[2].Substring(1)))
+                                    {
+                                        this.error = "Ошибка: имя метки зарезервированно!";
+                                        break;
+                                    }
+                                    if (get_dir_address(str[2]) == "")
+                                    {
+                                        this.error = "Ошибка: отсутствие метки в таблице символических имен!";
+                                        break;
+                                    }
                                     at_st[4] = (Convert.ToInt32(get_dir_address(str[2]), 16) - Convert.ToInt32(this.add_table.SkipWhile(x => x != str).Skip(1).DefaultIfEmpty(add_table[0]).FirstOrDefault()[0], 16)).ToString("X6");
                                     if (at_st[4].Length > 6)
                                     {
@@ -725,6 +761,15 @@ namespace _1
                                 }
                                 else
                                 {
+                                    if (Int32.TryParse(str[2][0].ToString(), out _)) {
+                                        this.error = "Ошибка: неправильный формат метки!";
+                                        break;
+                                    }
+                                    if (this.registers.Contains(str[2]))
+                                    {
+                                        this.error = "Ошибка: имя метки зарезервированно!";
+                                        break;
+                                    }
                                     at_st[4] = get_dir_address(str[2]);
                                     this.m_table.Add(str[0]);
                                 }
