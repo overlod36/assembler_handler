@@ -13,11 +13,12 @@ namespace _1
         private int address_counter;
         private int check_ex;
         private string section_name;
+        private List<string> lengths;
         private List<string[]> code;
         private List<string[]> name_table;
         private List<string[]> add_table;
         private List<string[]> code_table;
-        private List<string> m_table;
+        private List<string[]> m_table;
         private List<string[]> final_table;
         private string[] registers = { "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12", "R13", "R14", "R15" };
         private string[] p_c = { "START", "END", "RESW", "WORD", "RESB", "BYTE", "EXTREF", "EXTDEF", "CSECT" };
@@ -34,7 +35,8 @@ namespace _1
             this.code = new List<string[]>();
             this.name_table = new List<string[]>();
             this.add_table = new List<string[]>();
-            this.m_table = new List<string>();
+            this.m_table = new List<string[]>();
+            this.lengths = new List<string>();
             this.code_table = code_t_send;
             this.error = "";
             this.begin = false;
@@ -57,7 +59,7 @@ namespace _1
             return this.add_table;
         }
 
-        public List<string> get_m()
+        public List<string[]> get_m()
         {
             return this.m_table;
         }
@@ -256,6 +258,30 @@ namespace _1
             return false;
         }
 
+        private bool check_for_link(string mark, string section)
+        {
+            foreach (string[] st in this.name_table)
+            {
+                if (st[0] == mark && section == st[2] && st[3] == "ВС")
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private string get_mark_address(string mark, string name)
+        {
+            foreach (string[] str in this.name_table)
+            {
+                if (str[0] == mark && str[2] == this.section_name && str[3] == "ВИ")
+                {
+                    return str[1];
+                }
+            }
+            return "";
+        }
+
 
         private bool change_table_at(string mark, int addr, string name)
         {
@@ -279,6 +305,21 @@ namespace _1
             }
             this.error = "Ошибка: внешнее имя не было определено!";
             return false;
+        }
+
+        private void fill_by_m()
+        {
+            if (this.m_table.Count != 0)
+            {
+                foreach (string[] ret in this.m_table)
+                {
+                    if (ret[2] == this.section_name)
+                    {
+                        string[] qw = { "M", ret[0], ret[1] };
+                        this.final_table.Add(qw);
+                    }
+                }
+            }
         }
 
         private void pc_filler(string[] line)
@@ -324,11 +365,12 @@ namespace _1
                         this.address_counter = Convert.ToInt32(line[2], 16); // hex
                         this.begin_address = Convert.ToInt32(line[2], 16);
                         this.begin = true;
-                        string[] to_at_st = { "START", line[1], address_counter.ToString("X6"), " " };
+                        string[] to_at_st = { line[0], line[1], address_counter.ToString("X6"), " " };
                         this.add_table.Add(to_at_st);
                     }
                     break;
                 case "CSECT":
+                    this.lengths.Add(this.address_counter.ToString("X6"));
                     if (this.check_ex == 1)
                     {
                         this.error = "Ошибка: после объявления внешних имен и ссылок необходимо написать код!";
@@ -341,9 +383,9 @@ namespace _1
                     }
                     this.check_ex = 1;
                     this.section_name = line[0];
-                    this.address_counter = Convert.ToInt32("0", 16); ; // hex
                     string[] to_at_ces = { this.address_counter.ToString("X6"), "CSECT", line[0], " " };
                     this.add_table.Add(to_at_ces);
+                    this.address_counter = Convert.ToInt32("0", 16); ; // hex
                     break;
                 case "EXTDEF":
                     if (this.check_ex == 0)
@@ -553,6 +595,7 @@ namespace _1
                     }
                     break;
                 case "END":
+                    this.lengths.Add(this.address_counter.ToString("X6"));
                     if (line[0] != "_")
                     {
                         this.error = "Ошибка: директиве END не нужна метка!";
@@ -767,13 +810,42 @@ namespace _1
         public string second_cycle()
         {
             int i = 1;
+            int k = 0;
             this.final_table = new List<string[]>();
-            string[] st = { "H", this.name, this.begin_address.ToString("X6"), this.last_address.ToString("X6") };
-            this.final_table.Add(st);
             foreach (string[] str in this.add_table)
             {
                 switch (str[1])
                 {
+                    case "START":
+                        string[] st = { "H", this.name, this.begin_address.ToString("X6"), this.lengths[k] };
+                        this.section_name = this.name;
+                        this.final_table.Add(st);
+                        k += 1;
+                        break;
+                    case "EXTDEF":
+                        string add = get_mark_address(str[2], this.section_name);
+                        if (add == "")
+                        {
+                            this.error = "Ошибка: метка отсутствует в таблице символических имен!";
+                            break;
+                        }
+                        string[] at_def = { "D", str[2], add };
+                        this.final_table.Add(at_def);
+                        break;
+                    case "EXTREF":
+                        string[] at_ref = { "R", str[2] };
+                        this.final_table.Add(at_ref);
+                        break;
+                    case "CSECT":
+                        fill_by_m();
+                        this.section_name = str[2];
+                        // заполнение М и Е + сохранение промежуточных начальных и конечных адресов
+                        //string[] at_endt = { "E", "000000" };
+                        //this.final_table.Add(at_endt);
+                        string[] st_t = { "H", this.section_name, "000000", this.lengths[k] };
+                        this.final_table.Add(st_t);
+                        k += 1;
+                        break;
                     case "RESB":
                         string[] at_resb = { "T", str[0], Convert.ToInt32(str[2]).ToString("X")};
                         this.final_table.Add(at_resb);
@@ -787,11 +859,7 @@ namespace _1
                         this.final_table.Add(at_word);
                         break;
                     case "END":
-                        foreach (string el in this.m_table)
-                        {
-                            string[] m_stuff = { "M", el };
-                            this.final_table.Add(m_stuff);
-                        }
+                        fill_by_m();
                         if (Convert.ToInt32(str[2], 16) > (this.last_address + this.begin_address))
                         {
                             //Console.WriteLine(code_length);
@@ -830,6 +898,7 @@ namespace _1
                         else
                         {
                             string[] at_st = { "T", str[0], " | ", str[1], str[2], str[3] };
+                            //print_arr(at_st);
                             if (this.registers.Contains(at_st[4]) && this.registers.Contains(at_st[5]))
                             {
                                 at_st[4] = at_st[4][1].ToString();
@@ -872,7 +941,11 @@ namespace _1
                                         break;
                                     }
                                     at_st[4] = get_dir_address(str[2]);
-                                    this.m_table.Add(str[0]);
+                                    if (check_for_link(str[2], this.section_name))
+                                    {
+                                        string[] ad = { str[0], str[2], this.section_name};
+                                        this.m_table.Add(ad);
+                                    }
                                 }
                                 at_st[3] = str[1];
                                 at_st[2] = (at_st[3].Length + at_st[4].Length).ToString("X2");
@@ -886,6 +959,10 @@ namespace _1
                     return "(" + i.ToString() + ") " + this.error;
                 }
                 i += 1;
+            }
+            foreach(string[] st in this.m_table)
+            {
+                print_arr(st);
             }
             return "";
         }

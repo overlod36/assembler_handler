@@ -193,9 +193,10 @@ namespace _1
             else
             {
                 this.fill_final_code(ch.get_final_t());
-                foreach (string el in ch.get_m())
+                foreach (string[] el in ch.get_m())
                 {
-                    dataGridView1.Rows.Add(new object[] { el });
+                    string st = el[0] + " " + el[1] + " " + el[2];
+                    dataGridView1.Rows.Add(new object[] { st });
                 }
                 but_sec_cycle.Enabled = false;
             }
