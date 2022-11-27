@@ -233,21 +233,32 @@ namespace _1
             return true;
         }
 
-        private bool mark_in(string mark)
+        private bool mark_in(string mark, string q)
         {
             foreach (string[] str in this.name_table)
             {
-                if (str[0] == mark)
+                if (str[0] == mark && str[2] == this.section_name)
                 {
+                    if (q == str[3])
+                    {
+                        if (q == "ВИ")
+                            this.error = "Ошибка: объявлены два внешних имени с одинаковыми названиями в одной секции!";
+                        if (q == "ВС")
+                            this.error = "Ошибка: объявлены две внешние ссылки с одинаковыми названиями в одной секции!";
+                    }
+                    else
+                    {
+                        this.error = "Ошибка: объявлены внешнее имя и внешняя ссылка с одинаковыми названиями в одной секции!";
+                    }
                     return true;
                 }
             }
             return false;
         }
 
+
         private bool change_table_at(string mark, int addr, string name)
         {
-            Console.WriteLine(mark);
             foreach (string[] str in this.name_table)
             {
                 if (str[0] == mark && str[2] == name)
@@ -345,6 +356,10 @@ namespace _1
                         this.error = "Ошибка: некорректное имя метки!";
                         return;
                     }
+                    if (mark_in(line[2], "ВИ"))
+                    {
+                        return;
+                    }
                     string[] to_nt_def = { line[2], " ", this.section_name, "ВИ" };
                     this.name_table.Add(to_nt_def);
                     string[] to_at_def = { " ", "EXTDEF", line[2], " " };
@@ -354,6 +369,10 @@ namespace _1
                     if (this.check_ex == 0)
                     {
                         this.error = "Ошибка: объявление внешней ссылки в коде!";
+                        return;
+                    }
+                    if (mark_in(line[2], "ВС"))
+                    {
                         return;
                     }
                     // ???
