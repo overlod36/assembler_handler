@@ -707,11 +707,11 @@ namespace _1
         {
             foreach(string[] el in this.name_table)
             {
-                if (el[0] == dir)
+                if (el[0] == dir && el[3] == "ВИ")
                 {
                     return el[1];
                 }
-                if (dir[0] == '$' && dir.Substring(1) == el[0])
+                if (dir[0] == '$' && dir.Substring(1) == el[0] && el[3] == "ВИ")
                 {
                     return el[1];
                 }
@@ -927,6 +927,11 @@ namespace _1
                                     if (at_st[4].Length > 6)
                                     {
                                         at_st[4] = at_st[4].Substring(2);
+                                    }
+                                    if (check_for_link(str[2].Substring(1), this.section_name))
+                                    {
+                                        string[] ad = { str[0], str[2].Substring(1), this.section_name };
+                                        this.m_table.Add(ad);
                                     }
                                 }
                                 else

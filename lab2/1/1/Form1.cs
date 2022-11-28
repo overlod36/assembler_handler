@@ -25,7 +25,7 @@ namespace _1
         {
             string op = "";
             string n1 = "", n2 = "";
-            foreach (string line in System.IO.File.ReadLines(path + "\\res\\default_op.txt"))
+            foreach (string line in System.IO.File.ReadLines(path + "\\" + path.Split('\\').Last() + "\\res\\default_op.txt"))
             {
                 foreach (string el in line.Split(' '))
                 {
@@ -75,17 +75,17 @@ namespace _1
             richTextBox_code.Clear();
             if (ch == "Прямая адресация")
             {
-                st = path + "\\" + "\\res\\default_code1.txt";
+                st = path + "\\" + path.Split('\\').Last() + "\\res\\default_code1.txt";
                 this.type = 1;
             }
             else if (ch == "Относительная адресация")
             {
-                st = path + "\\" + "\\res\\default_code2.txt";
+                st = path + "\\" + path.Split('\\').Last() + "\\res\\default_code2.txt";
                 this.type = 2;
             }
             else
             {
-                st = path + "\\" + "\\res\\default_code3.txt";
+                st = path + "\\" + path.Split('\\').Last() + "\\res\\default_code3.txt";
                 this.type = 3;
             }
             foreach (string line in System.IO.File.ReadLines(st))
@@ -140,7 +140,7 @@ namespace _1
             {
                 foreach (string[] st in ch.get_name_t())
                 {
-                    dataGrid_name.Rows.Add(new object[] { st[0], st[1], st[2], st[3] });
+                    dataGrid_name.Rows.Add(new object[] { st[0], st[1] });
                 }
                 foreach (string[] st in ch.get_add_t())
                 {
