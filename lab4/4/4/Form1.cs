@@ -91,6 +91,22 @@ namespace _4
             }
         }
 
+        private void update_code()
+        {
+            richText_bincode.Clear();
+            bool ret = false;
+            foreach (string[] el in wz.get_final_table())
+            {
+                if (!ret)
+                {
+                    richText_bincode.AppendText(string.Join(" ", el));
+                    ret = true;
+                }
+                else
+                    richText_bincode.AppendText(Environment.NewLine + string.Join(" ", el));
+            }
+        }
+
         private void default_button_Click(object sender, EventArgs e)
         {
             fill_code();
@@ -109,6 +125,8 @@ namespace _4
             // на каждой итерации проверка на наличие ошибки + ПРОВЕРКА НА ВЫХОД ЗА ПРЕДЕЛЫ КОДА
             if (this.str_counter == 0)
             {
+                richText_bincode.Clear();
+                dataGrid_names.Rows.Clear();
                 this.str_counter = 1;
                 string_num.Text = this.str_counter.ToString();
                 this.wz = new Wizzard(get_code_table());
@@ -118,6 +136,12 @@ namespace _4
             else
             {
                 this.str_counter += 1;
+                if (str_counter > richText_code.Text.Split('\n').Count())
+                {
+                    str_counter = 0;
+                    update_code();
+                    return;
+                }
                 string_num.Text = this.str_counter.ToString();
                 wz.step(richText_code.Text.Split('\n')[str_counter - 1].Split());
                 richText_bincode.AppendText(Environment.NewLine + string.Join(" ", wz.get_final_table()[str_counter - 1]));
@@ -129,22 +153,9 @@ namespace _4
                 if (wz.to_update == true)
                 {
                     wz.to_update = false;
-                    richText_bincode.Clear();
-                    bool ret = false;
-                    foreach (string[] el in wz.get_final_table())
-                    {
-                        if (!ret)
-                        {
-                            richText_bincode.AppendText(string.Join(" ", el));
-                            ret = true;
-                        }
-                        else
-                            richText_bincode.AppendText(Environment.NewLine + string.Join(" ", el));
-                    }
+                    update_code();
                 }
-            }
-            
-            
+            } 
         }
     }
 }
