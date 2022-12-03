@@ -59,6 +59,7 @@ namespace _4
 
         private void set_mark_address(string mark)
         {
+            bool ch = false;
             foreach (string[] el in this.name_table)
             {
                 if (el[0] == mark)
@@ -73,8 +74,11 @@ namespace _4
                             this.to_update = true;
                         }
                     }
+                    ch = true;
                 }
             }
+            if (!ch)
+                this.name_table.Add(new string[] { mark, this.address_counter.ToString("X6"), "" });
         }
 
         private string get_mark_address(string mark)
@@ -119,7 +123,19 @@ namespace _4
             return new int[] { };
         }
 
-        // ПУСТЫЕ МЕТКИ В _
+        private string[] str_maker(string[] st)
+        {
+            string[] res = { st[0], st[1], ""};
+            string smth = "";
+            for (int i = 2; i < st.Length; i++)
+            {
+                smth = smth + st[i] + " ";
+            }
+            res[2] = smth.Remove(smth.Length-1);
+            return res;
+        }
+
+        // пустые строки
         public void step(string[] line)
         {
             if (line[0] == "")
@@ -177,16 +193,33 @@ namespace _4
                     if (int.TryParse(line[2], out _))
                     {
                         add = 1;
+                        this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), Convert.ToInt32(line[2]).ToString("X").Length.ToString("X2"), Convert.ToInt32(line[2]).ToString("X") });
                     }
                     else if (line[2][0] == 'x')
                     {
                         add = (line[2].Length - 1) / 2;
+                        this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), line[2].Substring(1, line[2].Length - 1).Length.ToString("X2"), line[2].Substring(1, line[2].Length - 1) });
                     }
-                    else if (line[2][0] == 'c')
+                    else if (line[2][0] == 'c') // проверка закрываемости кавычек при обычной и большой длине
                     {
+                        string last;
+                        if (line.Length > 3)
+                        {
+                            last = str_maker(line)[2];
+                            byte[] ba = Encoding.Default.GetBytes(last.Substring(2, last.Length - 3));
+                            this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), BitConverter.ToString(ba).Replace("-", "").Length.ToString("X2"), BitConverter.ToString(ba).Replace("-", "") });
+                        }
+                        else
+                        {
+                            byte[] ba = Encoding.Default.GetBytes(line[2].Substring(2, line[2].Length - 3));
+                            this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), BitConverter.ToString(ba).Replace("-", "").Length.ToString("X2"), BitConverter.ToString(ba).Replace("-", "") });
+                        }
                         add = (line[2].Length - 3);
                     }
-                    this.final_table.Add(new string[] { "T", "Пока заглушка!" });
+                    else
+                    {
+                        // ошибка
+                    }
                     this.address_counter += add;
                     break;
                 case "END":
@@ -194,8 +227,9 @@ namespace _4
                     // проверка на попадание в область памяти
                     // переполнение + неправильный формат адреса + лишние END
                     this.last_address = this.address_counter - this.begin_address;
+                    Console.WriteLine(this.last_address);
                     this.final_table[0][3] = this.last_address.ToString("X6");
-                    this.final_table.Add(new string[] { "E", Convert.ToInt32(line[2]).ToString("X") });
+                    this.final_table.Add(new string[] { "E", line[2] });
                     break;
                 default:
                     // сразу проверка на наличие команды
