@@ -106,7 +106,7 @@ namespace _4
 
         private void by_step_button_Click(object sender, EventArgs e)
         {
-            // на каждой итерации проверка на наличие ошибки
+            // на каждой итерации проверка на наличие ошибки + ПРОВЕРКА НА ВЫХОД ЗА ПРЕДЕЛЫ КОДА
             if (this.str_counter == 0)
             {
                 this.str_counter = 1;
@@ -125,6 +125,22 @@ namespace _4
                 foreach (string[] st in wz.get_name_table())
                 {
                     dataGrid_names.Rows.Add(new object[] { st[0], st[1], st[2] });
+                }
+                if (wz.to_update == true)
+                {
+                    wz.to_update = false;
+                    richText_bincode.Clear();
+                    bool ret = false;
+                    foreach (string[] el in wz.get_final_table())
+                    {
+                        if (!ret)
+                        {
+                            richText_bincode.AppendText(string.Join(" ", el));
+                            ret = true;
+                        }
+                        else
+                            richText_bincode.AppendText(Environment.NewLine + string.Join(" ", el));
+                    }
                 }
             }
             
