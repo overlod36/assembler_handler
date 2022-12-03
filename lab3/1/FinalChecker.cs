@@ -349,7 +349,7 @@ namespace _1
                             return;
                         }
 
-                        if (line[2] != "0")
+                        if (Convert.ToInt32(line[2]) != 0)
                         {
                             this.error = "Ошибка: загрузочный адрес должен быть равен 0!";
                             return;
