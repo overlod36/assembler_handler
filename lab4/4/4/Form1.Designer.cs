@@ -229,6 +229,7 @@ namespace _4
             this.full_button.TabIndex = 6;
             this.full_button.Text = "Полный проход";
             this.full_button.UseVisualStyleBackColor = true;
+            this.full_button.Click += new System.EventHandler(this.full_button_Click);
             // 
             // reset_button
             // 

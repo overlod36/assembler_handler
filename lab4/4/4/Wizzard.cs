@@ -319,5 +319,13 @@ namespace _4
                     break;
             }
         }
+
+        public void full_cycle(string[] code)
+        {
+            foreach (string str in code)
+            {
+                step(str.Split());
+            }
+        }
     }
 }

@@ -118,6 +118,7 @@ namespace _4
             dataGrid_names.Rows.Clear();
             richText_errors.Clear();
             richText_bincode.Clear();
+            this.str_counter = 0;
         }
 
         private void by_step_button_Click(object sender, EventArgs e)
@@ -156,6 +157,19 @@ namespace _4
                     update_code();
                 }
             } 
+        }
+
+        private void full_button_Click(object sender, EventArgs e)
+        {
+            // возможность начать обработку с середины
+            this.wz = new Wizzard(get_code_table());
+            wz.full_cycle(richText_code.Text.Split('\n'));
+            dataGrid_names.Rows.Clear();
+            foreach (string[] st in wz.get_name_table())
+            {
+                dataGrid_names.Rows.Add(new object[] { st[0], st[1], st[2] });
+            }
+            update_code();
         }
     }
 }
