@@ -119,11 +119,23 @@ namespace _4
             richText_errors.Clear();
             richText_bincode.Clear();
             this.str_counter = 0;
+            string_num.Clear();
         }
 
         private void by_step_button_Click(object sender, EventArgs e)
         {
-            // на каждой итерации проверка на наличие ошибки + ПРОВЕРКА НА ВЫХОД ЗА ПРЕДЕЛЫ КОДА
+            richText_errors.Clear();
+            if (richText_code.TextLength == 0)
+            {
+                richText_errors.Text = "Ошибка: поле кода пустое!";
+                return;
+            }
+            if (dataGrid_oper.Rows.Count <= 1 || dataGrid_oper.Rows == null)
+            {
+                richText_errors.Text = "Ошибка: таблица кодов операций пустая!";
+                return;
+            }
+            // на каждой итерации проверка на наличие ошибки
             if (this.str_counter == 0)
             {
                 richText_bincode.Clear();
@@ -132,10 +144,21 @@ namespace _4
                 string_num.Text = this.str_counter.ToString();
                 this.wz = new Wizzard(get_code_table());
                 wz.step(richText_code.Text.Split('\n')[str_counter-1].Split());
+                if (wz.get_error() != "")
+                {
+                    richText_errors.Text = wz.get_error();
+                    this.str_counter = 0;
+                    return;
+                }
                 richText_bincode.AppendText(string.Join(" ", wz.get_final_table()[str_counter-1]));
             }
             else
             {
+                if (wz.get_error() != "")
+                {
+                    richText_errors.Text = wz.get_error();
+                    return;
+                }
                 this.str_counter += 1;
                 if (str_counter > richText_code.Text.Split('\n').Count())
                 {
@@ -161,15 +184,34 @@ namespace _4
 
         private void full_button_Click(object sender, EventArgs e)
         {
-            // возможность начать обработку с середины
+            richText_errors.Clear();
+            if (richText_code.TextLength == 0)
+            {
+                richText_errors.Text = "Ошибка: поле кода пустое!";
+                return;
+            }
+            if (dataGrid_oper.Rows.Count <= 1 || dataGrid_oper.Rows == null)
+            {
+                richText_errors.Text = "Ошибка: таблица кодов операций пустая!";
+                return;
+            }
+            this.str_counter = 0;
+            string_num.Clear();
             this.wz = new Wizzard(get_code_table());
             wz.full_cycle(richText_code.Text.Split('\n'));
-            dataGrid_names.Rows.Clear();
-            foreach (string[] st in wz.get_name_table())
+            if (wz.get_error() == "")
             {
-                dataGrid_names.Rows.Add(new object[] { st[0], st[1], st[2] });
+                dataGrid_names.Rows.Clear();
+                foreach (string[] st in wz.get_name_table())
+                {
+                    dataGrid_names.Rows.Add(new object[] { st[0], st[1], st[2] });
+                }
+                update_code();
             }
-            update_code();
+            else
+            {
+                richText_errors.Text = wz.get_error();
+            }
         }
     }
 }
