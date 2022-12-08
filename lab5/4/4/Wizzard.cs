@@ -78,6 +78,7 @@ namespace _4
                     {
                         if (el[2].Split().Contains(sm[1]))
                         {
+
                             sm[4] = this.address_counter.ToString("X6");
                             sm[2] = (sm[3].Length + sm[4].Length).ToString("X2");
                             this.to_update = true;
@@ -95,9 +96,9 @@ namespace _4
             foreach (string[] el in this.name_table)
             {
                 if (el[0] == mark)
-                {
                     return el[1];
-                }
+                if (mark[0] == '$' && mark.Substring(1) == el[0])
+                    return el[1];
             }
             return "mfdoom";
         }
@@ -124,7 +125,18 @@ namespace _4
                         if (this.registers.Contains(line[2]) && this.registers.Contains(line[3]))
                             return new int[] { Int32.Parse(st[1]) * 4, Int32.Parse(st[2]) };
                     }
-                    return new int[] { Int32.Parse(st[1]) * 4 + 1, Int32.Parse(st[2]) }; // проверка таблицы в самом начале???
+                    if (line[2][0] == '$' && this.type == 1 && !Int32.TryParse(line[2][1].ToString(), out _))
+                    {
+                        this.error = "(" + get_str_counter() + ") Ошибка: относительная адресация при примере прямой адресации!";
+                    }
+                    if (line[2][0] != '$' && this.type == 2 && !Int32.TryParse(line[2][0].ToString(), out _))
+                    {
+                        this.error = "(" + get_str_counter() + ") Ошибка: прямая адресация при примере относительной адресации!";
+                    }
+                    if (line[2][0] == '$')
+                        return new int[] { Int32.Parse(st[1]) * 4 + 2, Int32.Parse(st[2]) };
+                    else
+                        return new int[] { Int32.Parse(st[1]) * 4 + 1, Int32.Parse(st[2]) }; // проверка таблицы в самом начале???
                 }
                 else if (st[0] == (line[1] + " " + line[2] + " "))
                     return new int[] { Int32.Parse(st[1]) * 4 + 1, Int32.Parse(st[2]) };
@@ -177,12 +189,12 @@ namespace _4
             {
                 if (begin && (el >= '0' && el <= '9'))
                 {
-                    this.error = "Ошибка: некорректное имя метки/команды, первый символ - цифра!";
+                    this.error = "(" + get_str_counter() + ") Ошибка: некорректное имя метки/команды, первый символ - цифра!";
                     return false;
                 }
                 if (begin && el == '_')
                 {
-                    this.error = "Ошибка: некорректное имя метки/команды!";
+                    this.error = "(" + get_str_counter() + ") Ошибка: некорректное имя метки/команды!";
                     return false;
                 }
                 begin = false;
@@ -509,46 +521,46 @@ namespace _4
                         // улучшенная проверка метки, есть ли у нее адрес
                         set_mark_address(line[0]);
                         this.to_update = true;
-                        if (line.Length == 3)
+                    }
+                    if (line.Length == 3)
+                    {
+                        int[] helper1 = get_command_code(line);
+                        string addr = get_mark_address(line[2]);
+                        if (addr != "" && addr != "mfdoom")
+                        {
+                            this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), (helper1[0].ToString("X2").Length + addr.Length).ToString("X2"), helper1[0].ToString("X2"), addr });
+                            this.str_counter += 1;
+                        }
+
+                        else if (addr == "mfdoom")
+                        {
+                            this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), "?", helper1[0].ToString("X2"), "?" });
+                            if (line[2][0] == '$')
+                                this.name_table.Add(new string[] { line[2].Substring(1), "", this.address_counter.ToString("X6") });
+                            else
+                                this.name_table.Add(new string[] { line[2], "", this.address_counter.ToString("X6") });
+                            this.str_counter += 1;
+                        }
+                        else
+                        {
+                            this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), "?", helper1[0].ToString("X2"), "?" });
+                            if (line[2][0] == '$')
+                                add_waiter(line[2].Substring(1));
+                            else
+                                add_waiter(line[2]);
+                            this.str_counter += 1;
+                        }
+
+                        this.address_counter += helper1[1];
+                    }
+                    else if (line.Length == 4)
+                    {
+                        if (this.registers.Contains(line[2]) && this.registers.Contains(line[3]))
                         {
                             int[] helper1 = get_command_code(line);
-                            string addr = get_mark_address(line[2]);
-                            if (addr != "" && addr != "mfdoom")
-                            {
-                                this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), (helper1[0].ToString("X2").Length + addr.Length).ToString("X2"), helper1[0].ToString("X2"), addr });
-                                this.str_counter += 1;
-                            }
-                                
-                            else if (addr == "mfdoom")
-                            {
-                                this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), "?", helper1[0].ToString("X2"), "?" });
-                                this.name_table.Add(new string[] { line[2], "", this.address_counter.ToString("X6") });
-                                this.str_counter += 1;
-                            }
-                            else
-                            {
-                                this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), "?", helper1[0].ToString("X2"), "?" });
-                                add_waiter(line[2]);
-                                this.str_counter += 1;
-                            }
-                                
+                            this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), (helper1[0].ToString("X2").Length + 2).ToString("X2"), helper1[0].ToString("X2"), line[2][1].ToString(), line[3][1].ToString() });
                             this.address_counter += helper1[1];
-                        }
-                        else if (line.Length == 4)
-                        {
-                            if (this.registers.Contains(line[3]) && this.registers.Contains(line[4]))
-                            {
-                                int[] helper1 = get_command_code(line);
-                                string addr = get_mark_address(line[2]);
-                                this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), (helper1[0].ToString("X2").Length + 2).ToString("X2"), helper1[0].ToString("X2"), line[3][1].ToString() , line[4][1].ToString() });
-                                this.address_counter += helper1[1];
-                                this.str_counter += 1;
-                            }
-                            else
-                            {
-                                this.error = "(" + get_str_counter() + ") Ошибка: неверный формат команды!";
-                                break;
-                            }
+                            this.str_counter += 1;
                         }
                         else
                         {
@@ -558,53 +570,8 @@ namespace _4
                     }
                     else
                     {
-                        if (line.Length == 3)
-                        {
-                            int[] helper1 = get_command_code(line);
-                            string addr = get_mark_address(line[2]);
-                            
-                            if (addr != "" && addr != "mfdoom")
-                            {
-                                this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), (helper1[0].ToString("X2").Length + addr.Length).ToString("X2"), helper1[0].ToString("X2"), addr });
-                                this.str_counter += 1;
-                            }
-                                
-                            else if (addr == "mfdoom")
-                            {
-                                this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), "?", helper1[0].ToString("X2"), "?" });
-                                this.name_table.Add(new string[] { line[2], "", this.address_counter.ToString("X6") });
-                                this.str_counter += 1;
-                            }
-                            else
-                            {
-                                this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), "?", helper1[0].ToString("X2"), "?" });
-                                add_waiter(line[2]);
-                                this.str_counter += 1;
-                            }
-
-                            this.address_counter += helper1[1];
-                        }
-                        else if (line.Length == 4)
-                        {
-                            if (this.registers.Contains(line[2]) && this.registers.Contains(line[3]))
-                            {
-                                int[] helper1 = get_command_code(line);
-                                string addr = get_mark_address(line[2]);
-                                this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), (helper1[0].ToString("X2").Length + 2).ToString("X2"), helper1[0].ToString("X2"), line[2][1].ToString(), line[3][1].ToString() });
-                                this.address_counter += helper1[1];
-                                this.str_counter += 1;
-                            }
-                            else
-                            {
-                                this.error = "(" + get_str_counter() + ") Ошибка: неверный формат команды!";
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            this.error = "(" + get_str_counter() + ") Ошибка: неверный формат команды!";
-                            break;
-                        }
+                        this.error = "(" + get_str_counter() + ") Ошибка: неверный формат команды!";
+                        break;
                     }
                     break;
             }
