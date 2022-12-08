@@ -16,6 +16,8 @@ namespace _4
         private string path = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
         private int str_counter = 0;
         private Wizzard wz;
+        private int type;
+        private string file;
         public Form1()
         {
             InitializeComponent();
@@ -38,22 +40,16 @@ namespace _4
         private void fill_code()
         {
             bool ret = false;
-            if (richText_code.Text.Length == 0)
+            richText_code.Clear();
+            foreach (string line in System.IO.File.ReadLines(path + "\\" + path.Split('\\').Last() + "\\res\\" + this.file))
             {
-                foreach (string line in System.IO.File.ReadLines(path + "\\" + path.Split('\\').Last() + "\\res\\default_code.txt"))
+                if (!ret)
                 {
-                    if (!ret)
-                    {
-                        richText_code.AppendText(line);
-                        ret = true;
-                    }
-                    else
-                        richText_code.AppendText(Environment.NewLine + line);
+                    richText_code.AppendText(line);
+                    ret = true;
                 }
-            }
-            else
-            {
-                Console.WriteLine("Поле с кодом уже занято!");
+                else
+                    richText_code.AppendText(Environment.NewLine + line);
             }
         }
 
@@ -109,12 +105,44 @@ namespace _4
 
         private void default_button_Click(object sender, EventArgs e)
         {
-            fill_code();
-            fill_op_table();
+            richText_errors.Clear();
+            if (comboBox_choice.SelectedItem != null)
+            {
+                string st = comboBox_choice.SelectedItem.ToString();
+                if (st == "Прямая адресация")
+                {
+                    this.type = 1;
+                    this.file = "default_code1.txt";
+                }
+                else if (st == "Относительная адресация")
+                {
+                    this.type = 2;
+                    this.file = "default_code2.txt";
+                }
+                else
+                {
+                    this.type = 3;
+                    this.file = "default_code3.txt";
+                }
+                fill_code();
+                if (dataGrid_oper.Rows.Count == 1)
+                {
+                    fill_op_table();
+                }
+                default_button.Enabled = false;
+                comboBox_choice.Enabled = false;
+            }
+            else
+            {
+                richText_errors.Text = "Ошибка: не выбран режим работы!";
+            }
+            
         }
 
         private void reset_button_Click(object sender, EventArgs e)
         {
+            comboBox_choice.Enabled = true;
+            default_button.Enabled = true;
             dataGrid_names.Rows.Clear();
             richText_errors.Clear();
             richText_bincode.Clear();
@@ -142,7 +170,7 @@ namespace _4
                 dataGrid_names.Rows.Clear();
                 this.str_counter = 1;
                 string_num.Text = this.str_counter.ToString();
-                this.wz = new Wizzard(get_code_table());
+                this.wz = new Wizzard(get_code_table(), this.type);
                 wz.step(richText_code.Text.Split('\n')[str_counter-1].Split());
                 if (wz.get_error() != "")
                 {
@@ -197,7 +225,7 @@ namespace _4
             }
             this.str_counter = 0;
             string_num.Clear();
-            this.wz = new Wizzard(get_code_table());
+            this.wz = new Wizzard(get_code_table(), this.type);
             wz.full_cycle(richText_code.Text.Split('\n'));
             if (wz.get_error() == "")
             {

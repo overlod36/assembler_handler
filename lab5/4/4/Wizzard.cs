@@ -19,11 +19,12 @@ namespace _4
         private List<string[]> code_table;
         private List<string[]> final_table;
         private string error;
+        private int type;
         public bool empty;
 
         // нужно ли поле имени программы?
 
-        public Wizzard(List<string[]> sent_code)
+        public Wizzard(List<string[]> sent_code, int ch)
         {
             this.name_table = new List<string[]>();
             this.final_table = new List<string[]>();
@@ -33,6 +34,7 @@ namespace _4
             this.to_update = false;
             this.error = "";
             this.empty = false;
+            this.type = ch;
         }
 
         private string get_str_counter()
@@ -242,9 +244,9 @@ namespace _4
                         this.error = "(" + get_str_counter() + ") Ошибка: отсутствует загрузочный адрес!";
                         break;
                     }
-                    if (line[2] == "0")
+                    if (line[2] != "0")
                     {
-                        this.error = "(" + get_str_counter() + ") Ошибка: загрузочный адрес не может быть равен 0!";
+                        this.error = "(" + get_str_counter() + ") Ошибка: загрузочный адрес должен быть равен 0!";
                         break;
                     }
                     if (!check_hex(line[2]))
@@ -273,6 +275,11 @@ namespace _4
                         this.error = "(" + get_str_counter() + ") Ошибка: некорректное имя метки!";
                         break;
                     }
+                    if (this.registers.Contains(line[0]))
+                    {
+                        this.error = "(" + get_str_counter() + ") Ошибка: имя метки зарезирвированно!";
+                        break;
+                    }
                     if (mark_in(line[0]))
                     {
                         this.error = "(" + get_str_counter() + ") Ошибка: " + line[0] + " уже есть в таблице символических имен!";
@@ -297,6 +304,11 @@ namespace _4
                     if (!check_str(line[0]))
                     {
                         this.error = "(" + get_str_counter() + ") Ошибка: некорректное имя метки!";
+                        break;
+                    }
+                    if (this.registers.Contains(line[0]))
+                    {
+                        this.error = "(" + get_str_counter() + ") Ошибка: имя метки зарезирвированно!";
                         break;
                     }
                     if (mark_in(line[0]))
@@ -324,6 +336,11 @@ namespace _4
                     if (!check_str(line[0]))
                     {
                         this.error = "(" + get_str_counter() + ") Ошибка: некорректное имя метки!";
+                        break;
+                    }
+                    if (this.registers.Contains(line[0]))
+                    {
+                        this.error = "(" + get_str_counter() + ") Ошибка: имя метки зарезирвированно!";
                         break;
                     }
                     if (mark_in(line[0]))
@@ -355,6 +372,11 @@ namespace _4
                     if (!check_str(line[0]))
                     {
                         this.error = "(" + get_str_counter() + ") Ошибка: некорректное имя метки!";
+                        break;
+                    }
+                    if (this.registers.Contains(line[0]))
+                    {
+                        this.error = "(" + get_str_counter() + ") Ошибка: имя метки зарезирвированно!";
                         break;
                     }
                     if (mark_in(line[0]))
@@ -467,12 +489,20 @@ namespace _4
                     this.final_table.Add(new string[] { "E", line[2] });
                     break;
                 default:
+                    // проблема с ДЛИНОЙ КОМАНД и NOPE
+
                     // сразу проверка на наличие команды
                     if (line[0] != "_")
                     {
                         if (!check_str(line[0]))
                         {
                             this.error = "(" + get_str_counter() + ") Ошибка: некорректное имя метки!";
+                            break;
+                        }
+
+                        if (this.registers.Contains(line[0]))
+                        {
+                            this.error = "(" + get_str_counter() + ") Ошибка: имя метки зарезирвированно!";
                             break;
                         }
 
