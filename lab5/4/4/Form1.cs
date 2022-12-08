@@ -87,6 +87,13 @@ namespace _4
             }
         }
 
+        private void update_mod()
+        {
+            dataGrid_modif.Rows.Clear();
+            foreach (string el in wz.get_mod())
+                dataGrid_modif.Rows.Add(new object[] { el });
+        }
+
         private void update_code()
         {
             richText_bincode.Clear();
@@ -179,6 +186,7 @@ namespace _4
                     return;
                 }
                 richText_bincode.AppendText(string.Join(" ", wz.get_final_table()[str_counter - 1]));
+                update_mod();
             }
             else
             {
@@ -207,6 +215,7 @@ namespace _4
                     wz.to_update = false;
                     update_code();
                 }
+                update_mod();
             } 
         }
 
@@ -235,6 +244,8 @@ namespace _4
                     dataGrid_names.Rows.Add(new object[] { st[0], st[1], st[2] });
                 }
                 update_code();
+                update_mod();
+                wz.print_mod();
             }
             else
             {

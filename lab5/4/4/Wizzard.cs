@@ -15,6 +15,7 @@ namespace _4
         private int begin_address;
         private int last_address;
         private int address_counter;
+        private List<string> mod_table;
         private List<string[]> name_table;
         private List<string[]> code_table;
         private List<string[]> final_table;
@@ -28,6 +29,7 @@ namespace _4
         {
             this.name_table = new List<string[]>();
             this.final_table = new List<string[]>();
+            this.mod_table = new List<string>();
             this.code_table = sent_code;
             this.str_counter = 1;
             this.begin_address = 0;
@@ -56,9 +58,22 @@ namespace _4
             Console.WriteLine();
         }
 
+        public void print_mod()
+        {
+            foreach (string el in this.mod_table)
+            {
+                Console.WriteLine(el);
+            }
+        }
+
         public List<string[]> get_final_table()
         {
             return this.final_table;
+        }
+
+        public List<string> get_mod()
+        {
+            return this.mod_table;
         }
 
         public List<string[]> get_name_table()
@@ -78,8 +93,15 @@ namespace _4
                     {
                         if (el[2].Split().Contains(sm[1]))
                         {
-
-                            sm[4] = this.address_counter.ToString("X6");
+                            if (check_mod(sm[1]))
+                            {
+                                sm[4] = this.address_counter.ToString("X6");
+                            }
+                            else
+                            {
+                                // проверка на следующую строку
+                                sm[4] = (Convert.ToInt32(el[1], 16) - Convert.ToInt32(this.final_table.SkipWhile(x => x != sm).Skip(1).DefaultIfEmpty(this.final_table[0]).FirstOrDefault()[1], 16)).ToString("X6");
+                            }
                             sm[2] = (sm[3].Length + sm[4].Length).ToString("X2");
                             this.to_update = true;
                         }
@@ -200,6 +222,17 @@ namespace _4
                 begin = false;
             }
             return true;
+        }
+
+        private bool check_mod(string address)
+        {
+            // проверка на пустоту
+            foreach (string adr in this.mod_table)
+            {
+                if (adr == address)
+                    return true;
+            }
+            return false;
         }
 
         private bool mark_in(string mark)
@@ -528,7 +561,16 @@ namespace _4
                         string addr = get_mark_address(line[2]);
                         if (addr != "" && addr != "mfdoom")
                         {
-                            this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), (helper1[0].ToString("X2").Length + addr.Length).ToString("X2"), helper1[0].ToString("X2"), addr });
+                            if (line[2][0] != '$')
+                            {
+                                this.mod_table.Add(this.address_counter.ToString("X6"));
+                                this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), (helper1[0].ToString("X2").Length + addr.Length).ToString("X2"), helper1[0].ToString("X2"), addr });
+                            }
+                            else
+                            {
+                                this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), (helper1[0].ToString("X2").Length + addr.Length).ToString("X2"), helper1[0].ToString("X2"), (Convert.ToInt32(addr, 16) - (this.address_counter + helper1[1])).ToString("X6") });
+                            }
+                            
                             this.str_counter += 1;
                         }
 
@@ -538,7 +580,11 @@ namespace _4
                             if (line[2][0] == '$')
                                 this.name_table.Add(new string[] { line[2].Substring(1), "", this.address_counter.ToString("X6") });
                             else
+                            {
                                 this.name_table.Add(new string[] { line[2], "", this.address_counter.ToString("X6") });
+                                this.mod_table.Add(this.address_counter.ToString("X6"));
+                            }
+                                
                             this.str_counter += 1;
                         }
                         else
@@ -547,7 +593,10 @@ namespace _4
                             if (line[2][0] == '$')
                                 add_waiter(line[2].Substring(1));
                             else
+                            {
                                 add_waiter(line[2]);
+                                this.mod_table.Add(this.address_counter.ToString("X6"));
+                            }
                             this.str_counter += 1;
                         }
 

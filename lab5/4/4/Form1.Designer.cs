@@ -51,11 +51,11 @@ namespace _4
             this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.comboBox_choice = new System.Windows.Forms.ComboBox();
             this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.groupBox9 = new System.Windows.Forms.GroupBox();
+            this.dataGrid_modif = new System.Windows.Forms.DataGridView();
             this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.groupBox9 = new System.Windows.Forms.GroupBox();
-            this.dataGrid_modif = new System.Windows.Forms.DataGridView();
             this.Column7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -141,7 +141,7 @@ namespace _4
             this.groupBox3.Controls.Add(this.dataGrid_names);
             this.groupBox3.Location = new System.Drawing.Point(299, 12);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(342, 268);
+            this.groupBox3.Size = new System.Drawing.Size(387, 268);
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Таблица символических имен";
@@ -154,12 +154,12 @@ namespace _4
             this.Column4,
             this.Column5,
             this.Column6});
-            this.dataGrid_names.Location = new System.Drawing.Point(30, 32);
+            this.dataGrid_names.Location = new System.Drawing.Point(58, 32);
             this.dataGrid_names.Name = "dataGrid_names";
             this.dataGrid_names.RowHeadersVisible = false;
             this.dataGrid_names.RowHeadersWidth = 51;
             this.dataGrid_names.RowTemplate.Height = 24;
-            this.dataGrid_names.Size = new System.Drawing.Size(284, 213);
+            this.dataGrid_names.Size = new System.Drawing.Size(258, 213);
             this.dataGrid_names.TabIndex = 0;
             // 
             // groupBox4
@@ -210,7 +210,7 @@ namespace _4
             // 
             // full_button
             // 
-            this.full_button.Location = new System.Drawing.Point(61, 55);
+            this.full_button.Location = new System.Drawing.Point(62, 55);
             this.full_button.Name = "full_button";
             this.full_button.Size = new System.Drawing.Size(136, 38);
             this.full_button.TabIndex = 6;
@@ -292,6 +292,30 @@ namespace _4
             this.groupBox8.TabStop = false;
             this.groupBox8.Text = "Режим работы";
             // 
+            // groupBox9
+            // 
+            this.groupBox9.Controls.Add(this.dataGrid_modif);
+            this.groupBox9.Location = new System.Drawing.Point(692, 12);
+            this.groupBox9.Name = "groupBox9";
+            this.groupBox9.Size = new System.Drawing.Size(227, 269);
+            this.groupBox9.TabIndex = 14;
+            this.groupBox9.TabStop = false;
+            this.groupBox9.Text = "Таблица модификаторов";
+            // 
+            // dataGrid_modif
+            // 
+            this.dataGrid_modif.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGrid_modif.ColumnHeadersVisible = false;
+            this.dataGrid_modif.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Column7});
+            this.dataGrid_modif.Location = new System.Drawing.Point(30, 32);
+            this.dataGrid_modif.Name = "dataGrid_modif";
+            this.dataGrid_modif.RowHeadersVisible = false;
+            this.dataGrid_modif.RowHeadersWidth = 51;
+            this.dataGrid_modif.RowTemplate.Height = 24;
+            this.dataGrid_modif.Size = new System.Drawing.Size(165, 213);
+            this.dataGrid_modif.TabIndex = 0;
+            // 
             // Column4
             // 
             this.Column4.HeaderText = "Column4";
@@ -311,38 +335,13 @@ namespace _4
             this.Column6.HeaderText = "Column6";
             this.Column6.MinimumWidth = 6;
             this.Column6.Name = "Column6";
-            this.Column6.Width = 120;
-            // 
-            // groupBox9
-            // 
-            this.groupBox9.Controls.Add(this.dataGrid_modif);
-            this.groupBox9.Location = new System.Drawing.Point(648, 13);
-            this.groupBox9.Name = "groupBox9";
-            this.groupBox9.Size = new System.Drawing.Size(271, 267);
-            this.groupBox9.TabIndex = 14;
-            this.groupBox9.TabStop = false;
-            this.groupBox9.Text = "Таблица модификаторов";
-            // 
-            // dataGrid_modif
-            // 
-            this.dataGrid_modif.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGrid_modif.ColumnHeadersVisible = false;
-            this.dataGrid_modif.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Column7});
-            this.dataGrid_modif.Location = new System.Drawing.Point(52, 30);
-            this.dataGrid_modif.Name = "dataGrid_modif";
-            this.dataGrid_modif.RowHeadersVisible = false;
-            this.dataGrid_modif.RowHeadersWidth = 51;
-            this.dataGrid_modif.RowTemplate.Height = 24;
-            this.dataGrid_modif.Size = new System.Drawing.Size(172, 213);
-            this.dataGrid_modif.TabIndex = 0;
             // 
             // Column7
             // 
             this.Column7.HeaderText = "Column7";
             this.Column7.MinimumWidth = 6;
             this.Column7.Name = "Column7";
-            this.Column7.Width = 125;
+            this.Column7.Width = 120;
             // 
             // Form1
             // 
@@ -401,11 +400,11 @@ namespace _4
         private System.Windows.Forms.GroupBox groupBox7;
         private System.Windows.Forms.ComboBox comboBox_choice;
         private System.Windows.Forms.GroupBox groupBox8;
+        private System.Windows.Forms.GroupBox groupBox9;
+        private System.Windows.Forms.DataGridView dataGrid_modif;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column4;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column5;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column6;
-        private System.Windows.Forms.GroupBox groupBox9;
-        private System.Windows.Forms.DataGridView dataGrid_modif;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column7;
     }
 }
