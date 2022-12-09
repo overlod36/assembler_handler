@@ -568,7 +568,7 @@ namespace _4
                             }
                             else
                             {
-                                this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), (helper1[0].ToString("X2").Length + addr.Length).ToString("X2"), helper1[0].ToString("X2"), (Convert.ToInt32(addr, 16) - (this.address_counter + helper1[1])).ToString("X6") });
+                                this.final_table.Add(new string[] { "T", this.address_counter.ToString("X6"), (helper1[0].ToString("X2").Length + addr.Length).ToString("X2"), helper1[0].ToString("X2"), (Convert.ToInt32(addr, 16) - (this.address_counter + helper1[1])).ToString("X6").Substring(2) });
                             }
                             
                             this.str_counter += 1;

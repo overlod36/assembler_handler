@@ -177,6 +177,7 @@ namespace _1
             dataGrid_add.Rows.Clear();
             dataGridView1.Rows.Clear();
             richTextBox_bin_code.Clear();
+            richTextBox_first_err.Clear();
             richTextBox_sec_err.Clear();
             but_sec_cycle.Enabled = false;
             but_first_cycle.Enabled = true;

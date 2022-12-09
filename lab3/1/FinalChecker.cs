@@ -24,6 +24,7 @@ namespace _1
         private string[] p_c = { "START", "END", "RESW", "WORD", "RESB", "BYTE", "EXTREF", "EXTDEF", "CSECT" };
         private string name;
         private int code_length;
+        private string end_str;
         private bool begin;
         private bool end;
         private int type;
@@ -303,8 +304,9 @@ namespace _1
                     return true;
                 }
             }
-            this.error = "Ошибка: внешнее имя не было определено!";
-            return false;
+            string[] to_nt_ref = { mark, addr.ToString("X6"), name, "-" };
+            this.name_table.Add(to_nt_ref);
+            return true;
         }
 
         private void fill_by_m()
@@ -315,8 +317,17 @@ namespace _1
                 {
                     if (ret[2] == this.section_name)
                     {
-                        string[] qw = { "M", ret[0], ret[1] };
-                        this.final_table.Add(qw);
+                        if (!check_for_link(ret[1], section_name))
+                        {
+                            string[] qw = { "M", ret[0] };
+                            this.final_table.Add(qw);
+                        }
+                        else
+                        {
+                            string[] qw = { "M", ret[0], ret[1] };
+                            this.final_table.Add(qw);
+                        }
+                        
                     }
                 }
             }
@@ -371,11 +382,11 @@ namespace _1
                     break;
                 case "CSECT":
                     this.lengths.Add(this.address_counter.ToString("X6"));
-                    if (this.check_ex == 1)
+                    /*if (this.check_ex == 1)
                     {
                         this.error = "Ошибка: после объявления внешних имен и ссылок необходимо написать код!";
                         return;
-                    }
+                    }*/
                     if (!check_str(line[0]))
                     {
                         this.error = "Ошибка: некорректное имя секции!";
@@ -606,6 +617,7 @@ namespace _1
                     {
                         string[] to_end = { this.address_counter.ToString("X6"), line[1], this.begin_address.ToString("X"), " " };
                         this.add_table.Add(to_end);
+                        this.end_str = begin_address.ToString("X");
                         this.last_address = this.address_counter - this.begin_address;
                         this.end = true;
                         return;
@@ -637,6 +649,7 @@ namespace _1
 
                     string[] to_at_end = { this.address_counter.ToString("X6"), line[1], line[2], " " };
                     this.add_table.Add(to_at_end);
+                    this.end_str = line[2];
                     this.last_address = this.address_counter - this.begin_address;
                     this.end = true;
                     break;
@@ -707,11 +720,11 @@ namespace _1
         {
             foreach(string[] el in this.name_table)
             {
-                if (el[0] == dir && el[3] == "ВИ")
+                if ((el[0] == dir && el[3] == "ВИ") || (el[3] == "-" && el[0] == dir))
                 {
                     return el[1];
                 }
-                if (dir[0] == '$' && dir.Substring(1) == el[0] && el[3] == "ВИ")
+                if ((dir[0] == '$' && dir.Substring(1) == el[0] && el[3] == "ВИ") || (dir[0] == '$' && dir.Substring(1) == el[0] && el[3] == "-"))
                 {
                     return el[1];
                 }
@@ -842,6 +855,7 @@ namespace _1
                         // заполнение М и Е + сохранение промежуточных начальных и конечных адресов
                         //string[] at_endt = { "E", "000000" };
                         //this.final_table.Add(at_endt);
+                        this.final_table.Add(new string[] { "E", this.end_str });
                         string[] st_t = { "H", this.section_name, "000000", this.lengths[k] };
                         this.final_table.Add(st_t);
                         k += 1;
@@ -892,6 +906,7 @@ namespace _1
                     default:
                         if (str.Length == 3)
                         {
+                            Console.WriteLine(str);
                             string[] at_st = { "T", str[0], " | ", str[1], str[2] };
                             this.final_table.Add(at_st);
                         }
@@ -909,6 +924,11 @@ namespace _1
                             {
                                 if (str[2][0] == '$')
                                 {
+                                    if (check_for_link(str[2].Substring(1), this.section_name))
+                                    {
+                                        this.error = "Ошибка: относительная адресация внешней ссылки!";
+                                        break;
+                                    }
                                     if (Int32.TryParse(str[2][1].ToString(), out _)) {
                                         this.error = "Ошибка: неправильный формат метки!";
                                         break;
@@ -928,11 +948,6 @@ namespace _1
                                     {
                                         at_st[4] = at_st[4].Substring(2);
                                     }
-                                    if (check_for_link(str[2].Substring(1), this.section_name))
-                                    {
-                                        string[] ad = { str[0], str[2].Substring(1), this.section_name };
-                                        this.m_table.Add(ad);
-                                    }
                                 }
                                 else
                                 {
@@ -946,11 +961,8 @@ namespace _1
                                         break;
                                     }
                                     at_st[4] = get_dir_address(str[2]);
-                                    if (check_for_link(str[2], this.section_name))
-                                    {
-                                        string[] ad = { str[0], str[2], this.section_name};
-                                        this.m_table.Add(ad);
-                                    }
+                                    string[] ad = { str[0], str[2], this.section_name };
+                                    this.m_table.Add(ad);
                                 }
                                 at_st[3] = str[1];
                                 at_st[2] = (at_st[3].Length + at_st[4].Length).ToString("X2");
