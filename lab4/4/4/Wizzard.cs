@@ -20,6 +20,7 @@ namespace _4
         private List<string[]> final_table;
         private string error;
         public bool empty;
+        private bool end;
 
         // нужно ли поле имени программы?
 
@@ -33,6 +34,7 @@ namespace _4
             this.to_update = false;
             this.error = "";
             this.empty = false;
+            this.end = false;
         }
 
         private string get_str_counter()
@@ -40,6 +42,20 @@ namespace _4
             return this.str_counter.ToString();
         }
 
+        private bool check_opt()
+        {
+            string ch;
+            foreach (string[] el in this.code_table)
+            {
+                if (el[0][el[0].Length - 1] == ' ')
+                    ch = el[0].Remove(el[0].Length - 1);
+                else
+                    ch = el[0];
+                if (this.p_c.Contains(ch))
+                    return false;
+            }
+            return true;
+        }
         private void print_arr(string[] array)
         {
             Console.WriteLine("[{0}]", string.Join(", ", array));
@@ -88,6 +104,10 @@ namespace _4
                 this.name_table.Add(new string[] { mark, this.address_counter.ToString("X6"), "" });
         }
 
+        public bool get_end()
+        {
+            return this.end;
+        }
         private string get_mark_address(string mark)
         {
             foreach (string[] el in this.name_table)
@@ -157,13 +177,7 @@ namespace _4
 
         private bool check_quotes(string for_ch)
         {
-            int counter = 0;
-            foreach (char ch in for_ch)
-            {
-                if (ch == '\'')
-                    counter += 1;
-            }
-            if (counter > 1)
+            if (for_ch[1] == '\'' && for_ch[for_ch.Length - 1] == '\'')
                 return true;
             return false;
         }
@@ -213,12 +227,23 @@ namespace _4
             return res;
         }
 
+        
+
    
         // пустые строки
         public void step(string[] line)
         {
             this.empty = false;
-            print_arr(line);
+            if (!check_opt())
+            {
+                this.error = "Ошибка: директива в таблице кодов операции!";
+                return;
+            }
+            if (line.Length == 1)
+            {
+                this.error = "(" + get_str_counter() + ") Ошибка: неправильный формат директивы/команды!";
+                return;
+            }
             if (line[0] == "")
             {
                 line[0] = "_";
@@ -227,6 +252,11 @@ namespace _4
                     this.empty = true;
                     return;
                 }
+            }
+            if (end)
+            {
+                this.error = "(" + get_str_counter() + ") Ошибка: директива/команда после директивы END!";
+                return;
             }
             switch (line[1])
             {
@@ -252,7 +282,7 @@ namespace _4
                         this.error = "(" + get_str_counter() + ") Ошибка: неправильный формат адреса загрузки!";
                         break;
                     }
-                    if (line[2].Length > 6)
+                    if (Convert.ToInt32(line[2]) > 16777215)
                     {
                         this.error = "(" + get_str_counter() + ") Ошибка: переполнение адреса загрузки!";
                         break;
@@ -276,6 +306,11 @@ namespace _4
                     if (mark_in(line[0]))
                     {
                         this.error = "(" + get_str_counter() + ") Ошибка: " + line[0] + " уже есть в таблице символических имен!";
+                        break;
+                    }
+                    if (this.registers.Contains(line[0]))
+                    {
+                        this.error = "(" + get_str_counter() + ") Ошибка: имя метки зарезервированно!";
                         break;
                     }
                     if (!int.TryParse(line[2], out _))
@@ -304,6 +339,11 @@ namespace _4
                         this.error = "(" + get_str_counter() + ") Ошибка: " + line[0] + " уже есть в таблице символических имен!";
                         break;
                     }
+                    if (this.registers.Contains(line[0]))
+                    {
+                        this.error = "(" + get_str_counter() + ") Ошибка: имя метки зарезервированно!";
+                        break;
+                    }
                     if (!int.TryParse(line[2], out _))
                     {
                         this.error = "(" + get_str_counter() + ") Ошибка: Введено не число!";
@@ -324,6 +364,11 @@ namespace _4
                     if (!check_str(line[0]))
                     {
                         this.error = "(" + get_str_counter() + ") Ошибка: некорректное имя метки!";
+                        break;
+                    }
+                    if (this.registers.Contains(line[0]))
+                    {
+                        this.error = "(" + get_str_counter() + ") Ошибка: имя метки зарезервированно!";
                         break;
                     }
                     if (mark_in(line[0]))
@@ -360,6 +405,11 @@ namespace _4
                     if (mark_in(line[0]))
                     {
                         this.error = "(" + get_str_counter() + ") Ошибка: " + line[0] + " уже есть в таблице символических имен!";
+                        break;
+                    }
+                    if (this.registers.Contains(line[0]))
+                    {
+                        this.error = "(" + get_str_counter() + ") Ошибка: имя метки зарезервированно!";
                         break;
                     }
                     if (line[2][0] != 'c' && line[2][0] != 'x' && !int.TryParse(line[2], out _))
@@ -421,6 +471,11 @@ namespace _4
                     this.address_counter += add;
                     break;
                 case "END":
+                    if (this.end == true)
+                    {
+                        this.error = "(" + (Int32.Parse(get_str_counter()) + 1).ToString() + ") Ошибка: директива END уже присутствует!";
+                        break;
+                    }
                     if (check_name_table() != "")
                     {
                         this.error = "Ошибка: не определены следующие метки -> " + check_name_table();
@@ -436,6 +491,14 @@ namespace _4
                     {
                         this.final_table.Add(new string[] { "E", this.begin_address.ToString("X6") });
                         this.final_table[0][3] = this.last_address.ToString("X6");
+                        this.end = true;
+                        break;
+                    }
+                    if (line[2] == "")
+                    {
+                        this.final_table.Add(new string[] { "E", this.begin_address.ToString("X6") });
+                        this.final_table[0][3] = this.last_address.ToString("X6");
+                        this.end = true;
                         break;
                     }
                     if (!check_hex(line[2]))
@@ -443,9 +506,9 @@ namespace _4
                         this.error = "(" + get_str_counter() + ") Ошибка: неправильный формат адреса в директиве END!";
                         break;
                     }
-                    if (line[2].Length > 6)
+                    if (Convert.ToInt32(line[2]) > 16777215)
                     {
-                        this.error = "(" + get_str_counter() + ") Ошибка: переполнение адреса в директиве END!";
+                        this.error = "(" + get_str_counter() + ") Ошибка: переполнение адреса загрузки!";
                         break;
                     }
                     if (Convert.ToInt32(line[2], 16) != this.begin_address)
@@ -462,17 +525,30 @@ namespace _4
                         }
                     }
                     // лишние END
-
+                  
+                    this.str_counter += 1;
                     this.final_table[0][3] = this.last_address.ToString("X6");
-                    this.final_table.Add(new string[] { "E", line[2] });
+                    this.final_table.Add(new string[] { "E", Convert.ToInt32(line[2], 16).ToString("X6") });
+                    this.end = true;
                     break;
                 default:
+                    if (line.Length < 3)
+                    {
+                        this.error = "(" + get_str_counter() + ") Ошибка: неправильный формат команды!";
+                        return;
+                    }
                     // сразу проверка на наличие команды
                     if (line[0] != "_")
                     {
                         if (!check_str(line[0]))
                         {
                             this.error = "(" + get_str_counter() + ") Ошибка: некорректное имя метки!";
+                            break;
+                        }
+
+                        if (this.registers.Contains(line[0]))
+                        {
+                            this.error = "(" + get_str_counter() + ") Ошибка: имя метки зарезервированно!";
                             break;
                         }
 

@@ -151,6 +151,7 @@ namespace _4
             comboBox_choice.Enabled = true;
             default_button.Enabled = true;
             dataGrid_names.Rows.Clear();
+            dataGrid_modif.Rows.Clear();
             richText_errors.Clear();
             richText_bincode.Clear();
             this.str_counter = 0;
@@ -235,6 +236,7 @@ namespace _4
             this.str_counter = 0;
             string_num.Clear();
             this.wz = new Wizzard(get_code_table(), this.type);
+            wz.print_code_table();
             wz.full_cycle(richText_code.Text.Split('\n'));
             if (wz.get_error() == "")
             {

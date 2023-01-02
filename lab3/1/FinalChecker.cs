@@ -382,11 +382,6 @@ namespace _1
                     break;
                 case "CSECT":
                     this.lengths.Add(this.address_counter.ToString("X6"));
-                    /*if (this.check_ex == 1)
-                    {
-                        this.error = "Ошибка: после объявления внешних имен и ссылок необходимо написать код!";
-                        return;
-                    }*/
                     if (!check_str(line[0]))
                     {
                         this.error = "Ошибка: некорректное имя секции!";

@@ -22,6 +22,8 @@ namespace _4
         private string error;
         private int type;
         public bool empty;
+        private bool begin;
+        private bool end;
 
         // нужно ли поле имени программы?
 
@@ -37,6 +39,8 @@ namespace _4
             this.error = "";
             this.empty = false;
             this.type = ch;
+            this.begin = false;
+            this.end = false;
         }
 
         private string get_str_counter()
@@ -52,6 +56,15 @@ namespace _4
         public void print_final_table()
         {
             foreach (string[] el in this.final_table)
+            {
+                print_arr(el);
+            }
+            Console.WriteLine();
+        }
+
+        public void print_code_table()
+        {
+            foreach (string[] el in this.code_table)
             {
                 print_arr(el);
             }
@@ -125,6 +138,22 @@ namespace _4
             return "mfdoom";
         }
 
+        private bool check_command(string[] st)
+        {
+            foreach (string[] el in this.code_table)
+            {
+                if (el[0] == (st[1] + " "))
+                {
+                    if (el[2] == "1" && st.Length > 2)
+                    {
+                        this.error = "(" + get_str_counter() + ") Ошибка: операндная часть для команды запрещена!";
+                        return false;
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
         private void add_waiter(string mark)
         {
             foreach (string[] el in this.name_table)
@@ -159,6 +188,13 @@ namespace _4
                         return new int[] { Int32.Parse(st[1]) * 4 + 2, Int32.Parse(st[2]) };
                     else
                         return new int[] { Int32.Parse(st[1]) * 4 + 1, Int32.Parse(st[2]) }; // проверка таблицы в самом начале???
+                    
+                }
+                else if (st[0] == line[1])
+                {
+                    Console.WriteLine("!!");
+                    if (Int32.TryParse(line[2], out _))
+                        return new int[] { Int32.Parse(st[1]) * 4, Int32.Parse(st[2]) };
                 }
                 else if (st[0] == (line[1] + " " + line[2] + " "))
                     return new int[] { Int32.Parse(st[1]) * 4 + 1, Int32.Parse(st[2]) };
@@ -181,6 +217,21 @@ namespace _4
         {
             return this.error;
         }
+
+        private bool check_opt()
+        {
+            string ch;
+            foreach (string[] el in this.code_table)
+            {
+                if (el[0][el[0].Length - 1] == ' ')
+                    ch = el[0].Remove(el[0].Length - 1);
+                else
+                    ch = el[0];
+                if (this.p_c.Contains(ch))
+                    return false;
+            }
+            return true;
+        }
         private bool check_hex(string num)
         {
             foreach (char ch in num)
@@ -193,13 +244,7 @@ namespace _4
 
         private bool check_quotes(string for_ch)
         {
-            int counter = 0;
-            foreach (char ch in for_ch)
-            {
-                if (ch == '\'')
-                    counter += 1;
-            }
-            if (counter > 1)
+            if (for_ch[1] == '\'' && for_ch[for_ch.Length - 1] == '\'')
                 return true;
             return false;
         }
@@ -266,6 +311,16 @@ namespace _4
         {
             this.empty = false;
             print_arr(line);
+            if (!check_opt())
+            {
+                this.error = "Ошибка: директива в таблице кодов операции!";
+                return;
+            }
+            if (line.Length < 2)
+            {
+                this.error = "(" + get_str_counter() + ") Ошибка: неправильный формат команды/директивы!";
+                return;
+            }
             if (line[0] == "")
             {
                 line[0] = "_";
@@ -279,7 +334,7 @@ namespace _4
             {
                 case "START":
                     //проверка имени программы 
-                    if (this.begin_address != 0)
+                    if (this.begin)
                     {
                         this.error = "(" + get_str_counter() + ") Ошибка: повторное использование директиввы START!";
                         break;
@@ -289,7 +344,7 @@ namespace _4
                         this.error = "(" + get_str_counter() + ") Ошибка: отсутствует загрузочный адрес!";
                         break;
                     }
-                    if (line[2] != "0")
+                    if (Convert.ToInt32(line[2]).ToString("X6") != "000000")
                     {
                         this.error = "(" + get_str_counter() + ") Ошибка: загрузочный адрес должен быть равен 0!";
                         break;
@@ -299,7 +354,7 @@ namespace _4
                         this.error = "(" + get_str_counter() + ") Ошибка: неправильный формат адреса загрузки!";
                         break;
                     }
-                    if (line[2].Length > 6)
+                    if (Convert.ToInt32(line[2]) > 16777215)
                     {
                         this.error = "(" + get_str_counter() + ") Ошибка: переполнение адреса загрузки!";
                         break;
@@ -308,6 +363,7 @@ namespace _4
                     this.address_counter = begin_address;
                     this.str_counter += 1;
                     this.final_table.Add(new string[] { "H", line[0], this.address_counter.ToString("X6"), "?" });
+                    this.begin = true;
                     break;
                 case "RESB":
                     if (line[0] == "_")
@@ -488,6 +544,11 @@ namespace _4
                     this.address_counter += add;
                     break;
                 case "END":
+                    if (this.end == true)
+                    {
+                        this.error = "(" + (Int32.Parse(get_str_counter()) + 1).ToString() + ") Ошибка: директива END уже присутствует!";
+                        break;
+                    }
                     if (check_name_table() != "")
                     {
                         this.error = "Ошибка: не определены следующие метки -> " + check_name_table();
@@ -503,6 +564,14 @@ namespace _4
                     {
                         this.final_table.Add(new string[] { "E", this.begin_address.ToString("X6") });
                         this.final_table[0][3] = this.last_address.ToString("X6");
+                        this.end = true;
+                        break;
+                    }
+                    if (line[2] == "")
+                    {
+                        this.final_table.Add(new string[] { "E", this.begin_address.ToString("X6") });
+                        this.final_table[0][3] = this.last_address.ToString("X6");
+                        this.end = true;
                         break;
                     }
                     if (!check_hex(line[2]))
@@ -510,9 +579,9 @@ namespace _4
                         this.error = "(" + get_str_counter() + ") Ошибка: неправильный формат адреса в директиве END!";
                         break;
                     }
-                    if (line[2].Length > 6)
+                    if (Convert.ToInt32(line[2]) > 16777215)
                     {
-                        this.error = "(" + get_str_counter() + ") Ошибка: переполнение адреса в директиве END!";
+                        this.error = "(" + get_str_counter() + ") Ошибка: переполнение адреса загрузки!";
                         break;
                     }
                     if (Convert.ToInt32(line[2], 16) != this.begin_address)
@@ -528,15 +597,18 @@ namespace _4
                             break;
                         }
                     }
+                    foreach (string el in this.mod_table)
+                    {
+                        string[] m_stuff = { "M", el };
+                        this.final_table.Add(m_stuff);
+                    }
                     // лишние END
-
+                    this.str_counter += 1;
                     this.final_table[0][3] = this.last_address.ToString("X6");
                     this.final_table.Add(new string[] { "E", line[2] });
+                    this.end = true;
                     break;
                 default:
-                    // проблема с ДЛИНОЙ КОМАНД и NOPE
-
-                    // сразу проверка на наличие команды
                     if (line[0] != "_")
                     {
                         if (!check_str(line[0]))
@@ -558,6 +630,12 @@ namespace _4
                     if (line.Length == 3)
                     {
                         int[] helper1 = get_command_code(line);
+                        Console.WriteLine(helper1.Length);
+                        /*if (helper1.Length == 0)
+                        {
+                            this.error = "(" + get_str_counter() + ") Ошибка: неверный формат команды!";
+                            break;
+                        }*/
                         string addr = get_mark_address(line[2]);
                         if (addr != "" && addr != "mfdoom")
                         {

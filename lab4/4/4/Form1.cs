@@ -109,6 +109,7 @@ namespace _4
 
         private void default_button_Click(object sender, EventArgs e)
         {
+            richText_code.Clear();
             fill_code();
             fill_op_table();
         }
@@ -154,6 +155,7 @@ namespace _4
             }
             else
             {
+                Console.WriteLine(wz.get_error());
                 if (wz.get_error() != "")
                 {
                     richText_errors.Text = wz.get_error();
@@ -168,6 +170,11 @@ namespace _4
                 }
                 string_num.Text = this.str_counter.ToString();
                 wz.step(richText_code.Text.Split('\n')[str_counter - 1].Split());
+                if (wz.get_error() != "")
+                {
+                    richText_errors.Text = wz.get_error();
+                    return;
+                }
                 richText_bincode.AppendText(Environment.NewLine + string.Join(" ", wz.get_final_table()[str_counter - 1]));
                 dataGrid_names.Rows.Clear();
                 foreach (string[] st in wz.get_name_table())
@@ -201,6 +208,10 @@ namespace _4
             wz.full_cycle(richText_code.Text.Split('\n'));
             if (wz.get_error() == "")
             {
+                if (wz.get_end() == false)
+                {
+                    richText_errors.Text = "Ошибка: нет директивы END!";
+                }
                 dataGrid_names.Rows.Clear();
                 foreach (string[] st in wz.get_name_table())
                 {
